@@ -5,6 +5,7 @@
 var init = require('./config/init')(),
 	config = require('./config/config'),
 	mongoose = require('mongoose');
+var Magento = require('magento');
 
 /**
  * Main application entry file.

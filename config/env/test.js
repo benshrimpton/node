@@ -1,10 +1,10 @@
 'use strict';
 
 module.exports = {
-	db: 'mongodb://localhost/mean-test',
+	db: 'mongodb://localhost/splintr-test',
 	port: 3001,
 	app: {
-		title: 'MEAN.JS - Test Environment'
+		title: 'Splintr - Test Environment'
 	},
 	facebook: {
 		clientID: process.env.FACEBOOK_ID || 'APP_ID',
