@@ -1,6 +1,6 @@
 Splintr
 =======
-Splintr is a middleware of Magento, which improves the overall user experience. It is inspired by Gemgento and madison-reed.com.
+Splintr is a middleware of Magento, which provides a stand-alone admin inteface for common tasks not easily achieved with Magento such as drag and drop category product ordering, adding rich CMS content to Magento catgeories as well as stand alone CMS pages and building a front end with Express Views and concise templating language for rapid theme development using modern techniques. It is inspired by Gemgento and Madison-Reed.com.
 
 
 
