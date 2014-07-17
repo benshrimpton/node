@@ -10,12 +10,16 @@
 var mongoose = require('mongoose'),
     Schema = mongoose.Schema;
 
-
+/**
+ * Product Schema
+ * */
 var ProductSchema = new Schema({
 
     //Product ID
-    productId:{
-        type : String
+    product_id:{
+        type : String,
+        required : true,
+        unique : true
     },
 
     //Product sku
@@ -23,8 +27,11 @@ var ProductSchema = new Schema({
         type : String
     },
 
-    //Product Set
-    set: {
+    /*
+    * Product Set (In magento API doc, it is named as 'set').
+    * 'set' is not allowed to use here due to naming conventions of mongoose.
+    * */
+    product_set: {
         type : String
     },
 
@@ -46,11 +53,13 @@ var ProductSchema = new Schema({
     }],
 
     //Date when the product was created ( may remove in future )
+    //may change to Date time object in future
     created_at : {
         type : String
     },
 
     //Date when the product was last updated ( may remove in future )
+    //may change to Date item object in future
     updated_at : {
         type : String
     },
@@ -188,7 +197,7 @@ var ProductSchema = new Schema({
 
     //Define whether Google Checkout is applied to the product
     enable_googlecheckout :{
-       type : String
+        type : String
     }
 
     /**
@@ -198,5 +207,7 @@ var ProductSchema = new Schema({
      * - flatten out some of the objects
      * */
 
-
 });
+
+
+mongoose.model('Product', ProductSchema);

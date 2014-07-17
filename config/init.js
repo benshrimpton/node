@@ -13,11 +13,9 @@ module.exports = function() {
 	 * Before we begin, lets set the environment variable
 	 * We'll Look for a valid NODE_ENV variable and if one cannot be found load the development NODE_ENV
 	 */
-    console.log('Calling form init.js');
 	glob('./config/env/' + process.env.NODE_ENV + '.js', {
 		sync: true
 	}, function(err, environmentFiles) {
-		console.log();
 		if (!environmentFiles.length) {
 			if (process.env.NODE_ENV) {
 				console.log('\x1b[31m', 'No configuration file found for "' + process.env.NODE_ENV + '" environment using development instead');
