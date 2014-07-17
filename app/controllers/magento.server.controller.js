@@ -8,11 +8,90 @@
  * */
 var mongoose = require('mongoose'),
     Product = mongoose.model('Product'),
+    Category = mongoose.model('Category'),
     async = require('async'),
     _ = require('lodash');
 
 
 exports.synchProduct = function(req, res){
+    synchProduct(function(err, results){
+        if (err) {
+            return res.send(500, {
+                message : err.message
+            })
+        }
+        res.jsonp(results[0]);
+    });
+};
+
+/**
+ * Synchronize the category
+ * @callback function cb(err ,null|[objects]
+ * */
+var synchCategory = function(cb){
+    async.waterfall([
+        function(cb){
+            //to sync all categories
+            global.magento.catalogCategory.tree(function(err, catalogCategoryTree){
+                if (err) {
+                    cb(err);
+                } else {
+                    cb(null, catalogCategoryTree);
+                }
+            });
+        },
+        function( catalogCategoryTree, cb){
+            _.forEach(catalogCategoryTree, function(catalogCategory){
+                //save and update the catalogCategory
+            });
+        }
+    ], function(err, results){
+        if (err) {
+            cb(err)
+        }else {
+            cb(null, results);
+        }
+    });
+};
+
+/**
+ * Save the category using the retrieved catalog id
+ * @param String categoryId
+ * @callback function cb(err, null|err);
+ * */
+var saveCategoryById = function(categoryId, cb){
+    if ( typeof categoryId === 'undefined' )
+        cb(new Error('Something is wrong with category'));
+    global.magento.catalogCategory.info(categoryId, function(err, categoryInfo){
+        if (err) {
+            return cb(err);
+        }
+        Category.find({ category_id : categoryId }, function(err, category){
+            if (err) {
+                return cb(err);
+            }
+            //category does not exist in the database
+            if ( category.length !== 0 ){
+                console.log("Found category in database");
+                Category.update({ category_id : categoryId }, categoryInfo, function(err, affectedRow){
+                    console.log("Updated category row : " + affectedRow);
+                    cb(err, affectedRow);
+                });
+            } else {
+                var category = new Category(categoryInfo);
+                category.save(function(err){
+                    cb(err);
+                });
+            }
+        });
+    });
+};
+
+/**
+ * Synchronize the product
+ * @callback function cb(err, null|[objects])
+ * */
+var synchProduct = function(cb){
     async.waterfall([
         function(cb){
             global.magento.catalogProduct.list(function(err, storeView){
@@ -22,13 +101,14 @@ exports.synchProduct = function(req, res){
         function(storeView, cb){
             _.forEach(storeView, function(catalogProductEntity){
                 saveProductById(catalogProductEntity.product_id);
-//                console.log(catalogProductEntity);
             });
             cb(null, storeView);
         }
-    ], function(err, results){
-        if(err) throw err;
-        res.jsonp(results[0]);
+    ],function(err, results){
+        if ( typeof cb === 'function' ){
+            if (err) cb(err);
+            cb(null, results);
+        }
     });
 };
 
@@ -36,7 +116,7 @@ exports.synchProduct = function(req, res){
  * Save the product using the retrieved product id.
  *
  * @Param String productId
- * @callback function cb(null|err)
+ * @callback function cb(err, null|err)
  * */
 var saveProductById = function(productId, cb){
 
@@ -95,7 +175,8 @@ var saveProductById = function(productId, cb){
                             console.log(err);
                             throw err;
                         }
-                        console.log("The number of updated documents was %d", numAffectedRow);
+                        console.log("The number of updated product was %d", numAffectedRow);
+                        cb(err, numAffectedRow);
                     });
                 } else {
                     //create the product instead;
@@ -107,6 +188,7 @@ var saveProductById = function(productId, cb){
                             isSaved = false;
                             console.log(err);
                         }
+                        cb(err);
                     });
                 }
             }
