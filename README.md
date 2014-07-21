@@ -2,7 +2,8 @@ Splintr
 =======
 Splintr is a middleware for Magento built with a MEAN stack, which provides a stand-alone admin inteface for common tasks not easily achieved with Magento such as drag and drop category product ordering, adding rich CMS content to Magento catgeories as well as stand alone CMS pages/content and building a front end with Express Views and concise templating language for rapid theme development using modern techniques. It is inspired by Gemgento and Madison-Reed.com.
 
-
+##Important 
+For more information, please visit meanjs.org. 
 
 ## Before You Begin 
 Before you begin we recommend you read about the basic building blocks that assemble a MEAN.JS application: 

@@ -42,14 +42,13 @@ var ProductSchema = new Schema({
 
     //array of categories ( it is an array of string. may change it  )
     categories : [{
-        type : Schema.Types.ObjectId,
-        ref : 'category'
+        type : String,
+        ref : 'Category'
     }],
 
-    //array of websites ( it is an array of string. may change it  )
+    //array of websites
     websites : [{
-        type : Schema.Types.ObjectId,
-        ref : 'websites'
+        type : String
     }],
 
     //Date when the product was created ( may remove in future )
@@ -198,10 +197,40 @@ var ProductSchema = new Schema({
     //Define whether Google Checkout is applied to the product
     enable_googlecheckout :{
         type : String
-    }
+    },
+
+    /*
+    * Product Attribute Image
+    * */
+    product_media : [{
+        //Image file name
+        file : {
+            type : String
+        },
+        //Image file label
+        label : {
+            type : String
+        },
+        //Image file position
+        position : {
+            type : String
+        },
+        //Defines whether the image will associate only to one of three image types
+        exclude : {
+            type : String
+        },
+        //Image URL
+        url : {
+            type : String
+        },
+        //Array of types
+        types : [{
+            type : String
+        }]
+    }]
+
 
     /**
-     * continue on Monday
      * - install big number
      * - change some of the types
      * - flatten out some of the objects

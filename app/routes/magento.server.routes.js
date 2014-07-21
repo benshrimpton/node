@@ -11,7 +11,10 @@ var magento = require('../../app/controllers/magento');
 
 module.exports = function(app){
 
-    app.route('/magento')
+    app.route('/magento/product')
         .get(magento.synchProduct);
+
+    app.route('/magento/category')
+        .get(magento.synchCategory);
 
 };
