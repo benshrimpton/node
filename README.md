@@ -5,6 +5,10 @@ Splintr is a middleware for Magento built with a MEAN stack, which provides a st
 ##Important 
 For more information, please visit meanjs.org. 
 
+## Getting Started With MEAN.JS
+You have your application running but there are a lot of stuff to understand, we recommend you'll go over the [Offical Documentation](http://meanjs.org/docs.html). 
+In the docs we'll try to explain both general concepts of MEAN components and give you some guidelines to help you improve your development procees. We tried covering as many aspects as possible, and will keep update it by your request, you can also help us develop the documentation better by checking out the *gh-pages* branch of this repository.
+
 ## Before You Begin 
 Before you begin we recommend you read about the basic building blocks that assemble a MEAN.JS application: 
 * MongoDB - Go through [MongoDB Official Website](http://mongodb.org/) and proceed to their [Official Manual](http://docs.mongodb.org/manual/), which should help you understand NoSQL and MongoDB better.
@@ -54,9 +58,11 @@ Your application should run on the 3000 port so in your browser just go to [http
 That's it! your application should be running by now, to proceed with your development check the other sections in this documentation. 
 If you encounter any problem try the Troubleshooting section.
 
-## Getting Started With MEAN.JS
-You have your application running but there are a lot of stuff to understand, we recommend you'll go over the [Offical Documentation](http://meanjs.org/docs.html). 
-In the docs we'll try to explain both general concepts of MEAN components and give you some guidelines to help you improve your development procees. We tried covering as many aspects as possible, and will keep update it by your request, you can also help us develop the documentation better by checking out the *gh-pages* branch of this repository.
+
+## Routing (Temporary)
+localhost /magento/product - to synchronize the product including its attributes, attributes media, and ties price 
+localhost /magento/product - to synchronize the category 
+localhost /magento/product/all - to retrieve all product in JSONP
 
 ## Credits 
 Created and maintained By Black and Black Creative. 

@@ -227,8 +227,29 @@ var ProductSchema = new Schema({
         types : [{
             type : String
         }]
-    }]
+    }],
 
+    /*
+    * Product Tier Price
+    * */
+    product_tier_price : [{
+        //Customer Group ID
+        customer_price_id : {
+            type : String
+        },
+        //Website
+        website : {
+            type : String
+        },
+        //Quantity of items to which the price will be applied
+        qty : {
+            type : String
+        },
+        //Price that each item will cost
+        price : {
+            type : Number
+        }
+    }]
 
     /**
      * - install big number

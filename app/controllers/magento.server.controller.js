@@ -17,27 +17,6 @@ var mongoose = require('mongoose'),
 /**
  * Methods
  * */
-
-/**
- * Save the existed category in the database, like product and posts
- * @callback cb function(err, results|null)
- * */
-var synchCategory = function(cb){
-//    var arr = new Array();
-    Product.find({}, function(err , products){
-        if (err) return cb(err);
-        //retrieve all categories in the database
-        for(var i = 0; i < products.length; i++){
-            for(var j = 0; j < products[i].categories.length; j++){
-                console.log(products[i].categories[j] + '$%$%$%$%$%$%$%');
-                saveCategoryById(products[i].categories[j])
-            }
-        }
-        cb(null, products);
-    });
-};
-
-
 function getTreeCategory(parentId){
 
     var obj = {};
@@ -96,28 +75,24 @@ var saveCategoryById = function(categoryId, cb){
     });
 };
 
-
 /**
- * Synchronize the product
- * @callback function cb(err, null|[objects])
+ * Save the existed category in the database, like product and posts
+ * @callback cb function(err, results|null)
  * */
-var synchProduct = function(cb){
-    global.magento.catalogProduct.list(function(err, storeView){
-        if (err) {
-            return cb(err);
-        } else {
-            var currentIndex = 0;
-            for(var i = 0; i < storeView.length; i++){
-                console.log("saving product");
-                currentIndex = i;
-                saveProductById(storeView[i].product_id);
+var synchCategory = function(cb){
+//    var arr = new Array();
+    Product.find({}, function(err , products){
+        if (err) return cb(err);
+        //retrieve all categories in the database
+        for(var i = 0; i < products.length; i++){
+            for(var j = 0; j < products[i].categories.length; j++){
+                console.log(products[i].categories[j] + '$%$%$%$%$%$%$%');
+                saveCategoryById(products[i].categories[j])
             }
-            if (currentIndex === (storeView.length - 1))
-                cb(null, storeView);
         }
+        cb(null, products);
     });
 };
-
 
 /**
  * save the product attribute to mongoDB
@@ -219,7 +194,7 @@ var synchProductAttribute = function(cb){
 
 /**
  * Get the attribute media
- * @param String Product Id
+ * @param String ProductId
  * @callback cb (error | null, obj[])
  * */
 var getAttributeMedia = function(productId, cb){
@@ -231,6 +206,22 @@ var getAttributeMedia = function(productId, cb){
        }
     });
 };
+
+
+/**
+ * Get the product tier price
+ * @param String productId
+ * @callback cb (error | null, obj][])
+ * */
+var getTierPrice = function(productId, cb){
+    global.magento.catalogProductTierPrice({ product : productId }, function(err, tierPrice){
+        if (err) {
+            cb(err);
+        } else {
+            cb(null, tierPrice);
+        }
+    });
+}
 
 /**
  * Save the product using the retrieved product id.
@@ -297,6 +288,27 @@ var saveProductById = function(productId, cb){
     });
 };
 
+/**
+ * Synchronize the product
+ * @callback function cb(err, null|[objects])
+ * */
+var synchProduct = function(cb){
+    global.magento.catalogProduct.list(function(err, storeView){
+        if (err) {
+            return cb(err);
+        } else {
+            var currentIndex = 0;
+            for(var i = 0; i < storeView.length; i++){
+                console.log("saving product");
+                currentIndex = i;
+                saveProductById(storeView[i].product_id);
+            }
+            if (currentIndex === (storeView.length - 1))
+                cb(null, storeView);
+        }
+    });
+};
+
 
 exports.synchProduct = function(req, res){
     synchProduct(function(err, results){
@@ -326,6 +338,19 @@ exports.synchCategory = function(req, res){
             });
         }
         res.jsonp(results[0]);
+    });
+};
+
+
+exports.getProducts = function(req, res){
+    Product.find({}, function(err, products){
+        if (err) {
+            return res.send(500, {
+                message : err.message
+            });
+        } else {
+            res.jsonp(products);
+        }
     });
 };
 
