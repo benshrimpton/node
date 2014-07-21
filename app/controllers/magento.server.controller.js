@@ -6,7 +6,8 @@
 /**
  * Module Dependencies
  * */
-var mongoose = require('mongoose'),
+var Promise = require('bluebird'),
+    mongoose = require('mongoose'),
     Product = mongoose.model('Product'),
     Category = mongoose.model('Category'),
     ProductAttribute = mongoose.model('ProductAttribute'),
@@ -17,6 +18,7 @@ var mongoose = require('mongoose'),
 /**
  * Methods
  * */
+//recursively retrieve the information from database.
 function getTreeCategory(parentId){
 
     var obj = {};
@@ -251,6 +253,8 @@ var saveProductById = function(productId, cb){
 
                     productInfo.product_media = media;
 
+                    //getProductTags(productInfo.product_id);
+
                     Product.findOne({ product_id : productInfo.product_id }, function(err, product){
                         if (err) {
                             console.log(err);
@@ -287,6 +291,16 @@ var saveProductById = function(productId, cb){
         }
     });
 };
+
+//
+//var getProductTags = function(productId){
+//    global
+//        .magento
+//        .catalogProductTag({ productId : productId })
+//        .then(function(tags){
+//            console.log(tags);
+//        });
+//};
 
 /**
  * Synchronize the product

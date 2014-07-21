@@ -5,7 +5,13 @@
 var init = require('./config/init')(),
 	config = require('./config/config'),
 	mongoose = require('mongoose'),
+    Promise = require('bluebird'),
     Magento = require('magento');
+
+/**
+ *
+ * */
+
 
 /**
  * Main application entry file.
@@ -39,8 +45,10 @@ var magento = new Magento({
  * */
 magento.login(function(err, sessionId){
     if (err) throw err;
-    global.magento = magento;
+    global.magento = Promise.promisifyAll(magento);
 });
+
+
 
 // Expose app
 exports = module.exports = app;

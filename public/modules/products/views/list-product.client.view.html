@@ -1,0 +1,15 @@
+<section data-ng-controller="ProductsController" data-ng-init="find()">
+    <div class="page-header">
+        <h1>Articles</h1>
+    </div>
+    <div class="list-group">
+        <a data-ng-repeat="product in products" data-ng-href="#!/articles/{{product.product_id}}" class="list-group-item">
+            <small class="list-group-item-text">
+                Posted on
+                <span data-ng-bind="product.created_at | date:'mediumDate'"></span>
+            </small>
+            <h4 class="list-group-item-heading" data-ng-bind="product.name"></h4>
+            <p class="list-group-item-text" data-ng-bind="product.description"></p>
+        </a>
+    </div>
+</section>
