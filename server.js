@@ -39,13 +39,13 @@ var magento = new Magento({
 });
 
 /**
- * Global object be accessible by other module.
+ * Global object be accessible by other module
  * In other words, it is public and has been exposed to all modules.
  * Beware with this global properties, and it may pose as a security risk.
  * */
 magento.login(function(err, sessionId){
     if (err) throw err;
-    global.magento = Promise.promisifyAll(magento);
+    global.magento = magento;
 });
 
 

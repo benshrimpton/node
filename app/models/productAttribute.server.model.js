@@ -14,6 +14,11 @@ var mongoose = require('mongoose'),
  * */
 var productAttributeSchema = new Schema({
 
+    //Product set associated with the attribute
+    product_set : {
+        type : String
+    },
+
     //Attribute Id
     attribute_id : {
         type : String

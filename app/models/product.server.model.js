@@ -35,7 +35,12 @@ var ProductSchema = new Schema({
         type : String
     },
 
-    //Product type
+    /*
+    * Product type
+    * The values can only be 'simple', 'grouped', 'configurable', 'virtual', 'bundle', 'downloadable'.
+    *
+    * Please check Magento API for the latest the update of the API.
+    * */
     type : {
         type : String
     },
@@ -249,7 +254,200 @@ var ProductSchema = new Schema({
         price : {
             type : Number
         }
+    }],
+
+    /*
+    * Array of catalog Product Tag Entity
+    * Note : This array doesn't contain the detail of each tag, which included tag status, tag base popularity
+    * for a specific store, and associative array of tagged products with related product ID as a key and popularity
+    * as a value.
+    *
+    * For more information, please visit
+    * http://www.magentocommerce.com/api/soap/catalog/catalogProductTag/product_tag.info.html
+    * */
+    product_tags : [{
+        tag_id : {
+            type : String
+        },
+        name : {
+            type : String
+        }
+    }],
+
+
+    /*
+    * Array of catalogProductCustomOptionList
+    *
+    * Note : This array doesn't contain the detail of each custom option, which includes additional_fields,
+    * which includes title, price, price_type, sku, max_characters, sort_order, file_extension, image_size_x,
+    * image_size_y, value_id.
+    *
+    *
+    * Custom Types :
+    * 1.) label : Field , value : field
+    * 2.) label : Area , value : area
+    * 3.) label : File , value : file
+    * 4.) label : Drop-down, value : drop-down
+    * 5.) label : Radio Buttons, value : radio
+    * 6.) label : Checkbox, value : checkbox
+    * 7.) label : Multiple Select, value : multiple
+    * 8.) label : Date & Time, value : date_time
+    * 9.) label : Time, value : time
+    *
+    * For more information, please visit
+    * http://www.magentocommerce.com/api/soap/catalog/catalogProductCustomOption/product_custom_option.info.html
+    * */
+    product_customOptions : [{
+        option_id : {
+            type : String
+        },
+        title : {
+            type : String
+        },
+        type : {
+            type : String
+        },
+        sort_order : {
+            type : String
+        },
+        is_require : {
+            type : Number
+        }
+    }],
+
+
+    /*
+    * Product Downloadable Link
+    * */
+    //Array of catalogProductDownloadableEntity
+    links : [{
+        //Link ID
+        link_id : {
+            type : String
+        },
+        //Link title
+        title : {
+            type : String
+        },
+        //Downloadable link price value
+        price : {
+            type : String
+        },
+        //number of possible downloads
+        number_of_downloads : {
+            type : Number
+        },
+        //Defines whether the number of downloads is unlimited
+        is_unlimited : {
+            type : Number
+        },
+        //Defines whether the link is shareable
+        is_shareable : {
+            type : Number
+        },
+        //Link URL address
+        link_url : {
+            type : String
+        },
+        //Type of link data source. Can have one of the following values : 'file' or 'url'
+        link_type : {
+            type : String
+        },
+        //Sample file name
+        sample_file : {
+            type : String
+        },
+        //Sample URL
+        sample_url : {
+            type : String
+        },
+        //Sample type
+        sample_type : {
+            type : String
+        },
+        //Link sort order
+        sort_order : {
+            type : String
+        },
+        //Array of catalogProductDownloadableLinkFileInfoEntity
+        file_save : [{
+            //File
+            file : {
+                type : String
+            },
+            //File name
+            name : {
+                type : String
+            },
+            //File Size
+            size : {
+                type : String
+            },
+            //Status
+            status : {
+                type : String
+            }
+        }],
+        sample_file_save : [{
+            //File
+            file : {
+                type : String
+            },
+            //File name
+            name : {
+                type : String
+            },
+            //File Size
+            size : {
+                type : String
+            },
+            //Status
+            status : {
+                type : String
+            }
+        }]
+    }],
+
+    //Array of catalogProductDownloadableSampleEntity
+    samples : [{
+        //Sample ID
+        sample_id : {
+            type : String
+        },
+        //Product ID
+        product_id : {
+            type : String
+        },
+        //Sample file name
+        sample_file : {
+            type : String
+        },
+        //Sample URL
+        sample_url : {
+            type : String
+        },
+        //Sample type. Can have one of the following values : "values" or "url"
+        sample_type : {
+            type : String
+        },
+        //Sort order
+        sort_order : {
+            type : String
+        },
+        //Default title
+        default_title : {
+            type : String
+        },
+        //Store title
+        store_title : {
+            type : String
+        },
+        //Sample title
+        title : {
+            type : String
+        }
     }]
+
 
     /**
      * - install big number

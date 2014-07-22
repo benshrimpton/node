@@ -14,7 +14,6 @@ var Promise = require('bluebird'),
     async = require('async'),
     _ = require('lodash');
 
-
 /**
  * Methods
  * */
@@ -22,17 +21,17 @@ var Promise = require('bluebird'),
 function getTreeCategory(parentId){
 
     var obj = {};
-    console.log(parentId);
     obj.parentId = (typeof parentId !== 'undefined') ? parentId : 0; //assuming the id of the root of the tree is zero.
 
     global.magento.catalogCategory.tree(obj ,function(err, catalogCategory){
-        if (err) throw err;
-        for(var i = 0; i < catalogCategory.children.length; i++){
-            console.log("########### ##########");
-            console.log(catalogCategory.children[i]);
-            saveCategoryById(catalogCategory.children[i].category_id);
-            if ( catalogCategory.children[i].children.length > 0 ){
-                getTreeCategory(catalogCategory.children[i].category_id);
+        if (err) {
+            console.log(err)
+        } else {
+            for(var i = 0; i < catalogCategory.children.length; i++){
+                saveCategoryById(catalogCategory.children[i].category_id);
+                if ( catalogCategory.children[i].children.length > 0 ){
+                    getTreeCategory(catalogCategory.children[i].category_id);
+                }
             }
         }
     });
@@ -59,7 +58,6 @@ var saveCategoryById = function(categoryId, cb){
             }
             //category does not exist in the database
             if ( category.length !== 0 ){
-                console.log("Found category in database");
                 Category.update({ category_id : categoryId }, categoryInfo, function(err, affectedRow){
                     if(err) throw err;
                     console.log("Updated category row : " + affectedRow);
@@ -88,7 +86,6 @@ var synchCategory = function(cb){
         //retrieve all categories in the database
         for(var i = 0; i < products.length; i++){
             for(var j = 0; j < products[i].categories.length; j++){
-                console.log(products[i].categories[j] + '$%$%$%$%$%$%$%');
                 saveCategoryById(products[i].categories[j])
             }
         }
@@ -158,6 +155,7 @@ var saveProductAttribute = function(setId, cb){
                         //handle the error
                         return cb(err);
                     } else {
+                        attributeDetail.product_set = setId;
                         saveProductAttributeToDB(attributeDetail, function(err){
                             if (err) {
                                return  cb(err);
@@ -176,60 +174,47 @@ var saveProductAttribute = function(setId, cb){
  * @callback cb (error | null)
  * */
 var synchProductAttribute = function(cb){
-    Product.find({}, function(err, products){
-        if (err) {
-            console.log(err);
-            cb(err)
-        } else {
-            for(var i = 0; i < products.length; i++){
-                saveProductAttribute(products[i].product_set, function(err){
-                    if (err){
-                        console.log(err);
-                        return cb(err);
-                    }
-                });
+    /*
+    * Clear the database, and reconstruct the database;
+    * */
+    ProductAttribute
+        .find({})
+        .remove()
+        .exec(function(err){
+            if (err) {
+                return cb(err);
             }
-            cb(null);
-        }
-    });
+            global.magento.catalogProductAttributeSet.list(function(err, sets){
+                if (err) {
+                    return cb(err);
+                }
+
+                for(var i = 0; i < sets.length; i++){
+                    saveProductAttribute(sets[i].set_id, function(err){
+                        if (err) {
+                            return cb(err);
+                        }
+                    });
+                }
+                return cb(null);
+            });
+        });
+
 };
 
-/**
- * Get the attribute media
- * @param String ProductId
- * @callback cb (error | null, obj[])
- * */
-var getAttributeMedia = function(productId, cb){
-    global.magento.catalogProductAttributeMedia.list({ product : productId }, function(err, media){
-       if (err) {
-           cb(err);
-       } else {
-           cb(null, media);
-       }
-    });
-};
 
 
-/**
- * Get the product tier price
- * @param String productId
- * @callback cb (error | null, obj][])
- * */
-var getTierPrice = function(productId, cb){
-    global.magento.catalogProductTierPrice({ product : productId }, function(err, tierPrice){
-        if (err) {
-            cb(err);
-        } else {
-            cb(null, tierPrice);
-        }
-    });
-}
+
 
 /**
  * Save the product using the retrieved product id.
  *
  * @Param String productId
  * @callback function cb(err, null|err)
+ *
+ *
+ * Note : It needs to be flatten out for maintainable. It also needs to clear out the program
+ *
  * */
 var saveProductById = function(productId, cb){
 
@@ -245,7 +230,7 @@ var saveProductById = function(productId, cb){
             productInfo.product_set = productInfo.set;
             productInfo.weight = (productInfo.weight) ? productInfo.weight : null;
 
-            getAttributeMedia(productInfo.product_id, function(err, media){
+            global.magento.catalogProductAttributeMedia.list({ product : productInfo.product_id}, function(err, media){
                 if (err) {
                     console.log(err);
                     //handle the error
@@ -253,37 +238,119 @@ var saveProductById = function(productId, cb){
 
                     productInfo.product_media = media;
 
-                    //getProductTags(productInfo.product_id);
-
-                    Product.findOne({ product_id : productInfo.product_id }, function(err, product){
+                    global.magento.catalogProductTierPrice.info({ product : productInfo.product_id }, function(err, tierPrice){
                         if (err) {
-                            console.log(err);
+                            console.log(err)
+                            //handle the error
                         } else {
-                            //there is something in the product
-                            if (product) {
-                                //update the product instead;
-                                console.log("Found the product in database " + product.name);
-                                Product.update({ product_id : productInfo.product_id }, productInfo, function(err, numAffectedRow){
-                                    if (err) {
-                                        console.log(err);
-                                        throw err;
-                                    }
-                                    console.log("The number of updated product was %d", numAffectedRow);
-                                    //cb(err, numAffectedRow);
-                                });
 
-                            } else {
-                                //create the product instead;
-                                console.log(productInfo.name + " is created in database ");
-                                var product = new Product(productInfo);
+                            productInfo.product_tier_price = tierPrice;
 
-                                product.save(function(err, product, numAffectedRow){
-                                    if (err) {
-                                        console.log(err);
-                                    }
-                                    //cb(err);
-                                });
-                            }
+                            global.magento.catalogProduct.currentStore(function(err, storeView){
+                                if (err) {
+                                    console.log(err);
+                                    //handle the error
+                                } else {
+
+                                    global.magento.catalogProductTag.list({ productId : productInfo.product_id , storeView : storeView }, function(err, tags){
+
+                                        if (err) {
+                                            console.log(err);
+                                        } else {
+
+                                            console.log("___________________");
+                                            console.log(tags);
+                                            console.log("___________________");
+
+                                            productInfo.product_tags = tags;
+
+                                            global.magento.catalogProductCustomOption.list({ productId : productInfo.product_id }, function(err, customOption){
+                                                if (err) {
+                                                    console.log(err);
+                                                } else {
+
+                                                    productInfo.product_customOptions = customOption;
+
+                                                    if ( productInfo.type === 'downloadable' ) {
+                                                        global.magento.catalogProductDownloadableLink.list({ productId : productInfo.product_id }, function(err, productDownloadableLink){
+                                                            if (err) {
+                                                                console.log(err);
+                                                                //handle the error
+                                                            } else {
+                                                                productInfo.links = productDownloadableLink.links;
+                                                                productInfo.samples = productDownloadableLink.samples;
+                                                            }
+
+                                                            Product.findOne({ product_id : productInfo.product_id }, function(err, product){
+                                                                if (err) {
+                                                                    console.log(err);
+                                                                } else {
+                                                                    //there is something in the product
+                                                                    if (product) {
+                                                                        //update the product instead;
+                                                                        console.log("Found the product in database " + product.name);
+                                                                        Product.update({ product_id : productInfo.product_id }, productInfo, function(err, numAffectedRow){
+                                                                            if (err) {
+                                                                                console.log(err);
+                                                                                throw err;
+                                                                            }
+                                                                            console.log("The number of updated product was %d", numAffectedRow);
+                                                                            //cb(err, numAffectedRow);
+                                                                        });
+
+                                                                    } else {
+                                                                        //create the product instead;
+                                                                        var product = new Product(productInfo);
+
+                                                                        product.save(function(err, product, numAffectedRow){
+                                                                            if (err) {
+                                                                                console.log(err);
+                                                                            }
+                                                                            //cb(err);
+                                                                        });
+                                                                    }
+                                                                }
+                                                            });
+
+                                                        });
+                                                    } else {
+                                                        Product.findOne({ product_id : productInfo.product_id }, function(err, product){
+                                                            if (err) {
+                                                                console.log(err);
+                                                            } else {
+                                                                //there is something in the product
+                                                                if (product) {
+                                                                    //update the product instead;
+                                                                    Product.update({ product_id : productInfo.product_id }, productInfo, function(err, numAffectedRow){
+                                                                        if (err) {
+                                                                            console.log(err);
+                                                                            throw err;
+                                                                        }
+                                                                        //cb(err, numAffectedRow);
+                                                                    });
+
+                                                                } else {
+                                                                    //create the product instead;
+                                                                    var product = new Product(productInfo);
+
+                                                                    product.save(function(err, product, numAffectedRow){
+                                                                        if (err) {
+                                                                            console.log(err);
+                                                                        }
+                                                                        //cb(err);
+                                                                    });
+                                                                }
+                                                            }
+                                                        });
+                                                    }
+
+                                                }
+                                            });
+                                        }
+
+                                    });
+                                }
+                            });
                         }
                     });
                 }
@@ -292,15 +359,8 @@ var saveProductById = function(productId, cb){
     });
 };
 
-//
-//var getProductTags = function(productId){
-//    global
-//        .magento
-//        .catalogProductTag({ productId : productId })
-//        .then(function(tags){
-//            console.log(tags);
-//        });
-//};
+
+
 
 /**
  * Synchronize the product
@@ -313,7 +373,6 @@ var synchProduct = function(cb){
         } else {
             var currentIndex = 0;
             for(var i = 0; i < storeView.length; i++){
-                console.log("saving product");
                 currentIndex = i;
                 saveProductById(storeView[i].product_id);
             }
