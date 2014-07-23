@@ -9,7 +9,18 @@ var _ = require('lodash'),
     async = require('async');
 
 exports.index = function(req, res) {
-	res.render('index', {
+	res.render('theme/index', {
 		user: req.user || null
 	});
+};
+
+
+/**
+ * Need to REVISE the following function.
+ * Note: The following function can't be used in production
+ * */
+exports.admin = function(req, res){
+  res.render('admin/admin', {
+      user : req.user || null
+  })
 };

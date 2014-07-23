@@ -179,8 +179,6 @@ exports.removeItemFromCart = function(req, res){
             message  : 'You cart is empty'
         });
     }
-
-
 };
 
 /**
