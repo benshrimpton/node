@@ -172,13 +172,65 @@ exports.updateItemInCart = function(req, res){
     }
 };
 
-
+/**
+ * Remove an item from the shopping cart
+ * */
 exports.removeItemFromCart = function(req, res){
     if (!req.session.cart){
         return res.send(400, {
             message  : 'You cart is empty'
         });
+    } else if ( ! req.params.sku ) {
+        return res.send(400, {
+            message : 'No SKU is defined'
+        });
     }
+
+    var sku = req.params.sku;
+
+    global
+        .magento
+        .checkoutCartProduct
+        .list({ quoteId : req.session.cart.id }, function(err, products){
+            if (err) {
+                return res.send(200, {
+                    message : err.message
+                });
+            } else {
+                /*
+                * Does it need to loop through the whole thing to remove the item ?
+                * It needs to investigate.
+                *
+                * Update the following snippet of code to that it will break from the loop once it finds the item and
+                * remove the item.
+                * */
+              for(var i = 0; i < products.length; i++){
+                  if ( products[i].sku === sku ) {
+                      global
+                          .magento
+                          .checkoutCartProduct
+                          .remove({ quoteId : req.session.cart.id , productsData : products[i] }, function(err, isRemoved){
+                              if (err) {
+                                  return res.send(200, {
+                                      message : err.message
+                                  })
+                              } else {
+                                  if (isRemoved) {
+                                      return res.send(200, {
+                                          message : 'The cart has been cleared'
+                                      })
+                                  } else {
+                                      return res.send(400, {
+                                          message : 'The cart was not cleared'
+                                      });
+                                  }
+                              }
+                          });
+                  }
+              }
+            }
+        });
+
 };
 
 /**
@@ -228,6 +280,9 @@ exports.clearCart = function(req, res){
 };
 
 
+
+
 exports.checkout = function(req, res){
 
 };
+

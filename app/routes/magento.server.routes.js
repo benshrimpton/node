@@ -1,39 +1,16 @@
 /**
- * Created by tebesfinwo on 7/17/14.
+ * Created by tebesfinwo on 7/23/14.
  */
 'use strict';
 
-
-/**
- * Module Dependencies
- * */
 var magento = require('../../app/controllers/magento');
+
 
 module.exports = function(app){
 
-    //to synchronize product and attributes
-    app.route('/magento/sync/product')
-        .get(magento.synchProduct);
+    //to synchronize magento store
+    app.route('/magento/sync/store')
+        .get(magento.syncStore);
 
-
-    //to synchronize category
-    app.route('/magento/sync/category')
-        .get(magento.synchCategory);
-
-    /*
-    * Prototyping
-    * retrieve all products
-    * */
-    app.route('/magento/product')
-        .get(magento.getProducts);
-
-    /*
-    * Retrieve the detail of the product using SKU
-    * */
-    app.route('/magento/product/:productSKU')
-
-
-    //Binding the product with middleware
-    app.param('productSKU', magento.productBySKU);
 
 };
