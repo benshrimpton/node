@@ -91,10 +91,13 @@ exports.addToCart = function(req, res){
     }
 };
 
-
+/**
+ * retrieve a list of products in the shopping cart (quote) in the form of array.
+ * @return JSON
+ * */
 exports.getCart = function(req, res){
     if ( !req.session.cart ) {
-        return res.send(404, {
+        return res.send(400, {
             message : 'You cart is empty'
         });
     }
@@ -111,7 +114,36 @@ exports.getCart = function(req, res){
         });
 };
 
-exports.updateCart = function(req, res){
+exports.updateItemInCart = function(req, res){
+    if ( !req.session.cart ) {
+        return res.send(400, {
+            message : 'You cart is empty'
+        });
+    } else if ( typeof req.body.qty !== 'number' ){
+        return res.send(400, {
+            message : 'Naughty naughty, please use a proper number'
+        });
+    }
+
+
+
+    var product = {};
+
+    product.product_id = req.body.product_id;
+    product.sku = req.body.sku;
+    product.qty = req.body.qty;
+
+    /*
+     * Following variables were not added into the cart since
+     * it is not always requested.
+     *
+     * associativeArray Options - an array in the form of option_id => content (optional)
+     * associateArray bundle_option - an array of bundle item options (optional)
+     * associateArray bundle_option_qty - an array of bundle items quantity (optional)
+     * ArrayOfString links - an array of links (optional)
+     * */
+
+
 
 };
 

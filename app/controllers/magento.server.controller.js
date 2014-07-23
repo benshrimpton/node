@@ -427,3 +427,31 @@ exports.getProducts = function(req, res){
     });
 };
 
+/*
+* Get the product using its SKU
+*
+* @return JSON product
+* */
+exports.getProductBySKU = function(req, res){
+    res.jsonp(req.product);
+};
+
+/**
+ * Magento Express Middleware
+ * */
+exports.productBySKU = function(req, res, next, sku){
+
+    Product.findOne({ sku : sku }).exec(function(err, product){
+        if (err) {
+            return next(err);
+        }
+        if (!product) {
+            return next(new Error('The product (' + sku + ') is not our product.'));
+        }
+        req.product = product;
+        next();
+    });
+
+};
+
+

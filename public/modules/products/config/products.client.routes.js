@@ -9,11 +9,11 @@ angular.module('products').config(['$stateProvider',
         // Products state routing
         $stateProvider.
             state('listProducts', {
-                url: '/magento/product',
+                url: '/products',
                 templateUrl: 'modules/products/views/list-product.client.view.html'
             }).
             state('viewProduct', {
-                url: '/magento/product/:productId',
+                url: '/products/:productId',
                 templateUrl: 'modules/products/views/view-product.client.view.html'
             });
     }
