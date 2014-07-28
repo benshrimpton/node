@@ -34,8 +34,13 @@ module.exports = function(db) {
 	app.locals.description = config.app.description;
 	app.locals.keywords = config.app.keywords;
 	app.locals.facebookAppId = config.facebook.clientID;
-	app.locals.jsFiles = config.getJavaScriptAssets();
-	app.locals.cssFiles = config.getCSSAssets();
+    app.locals.jsFiles =  config.getJavaScriptAssets();
+    app.locals.cssFiles = config.getCSSAssets();
+
+    app.use(function(req, res, next){
+        res.locals.host = req.protocol + '://' + req.get('host') +  '/';
+        next();
+    });
 
 	// Passing the request url to environment locals
 	app.use(function(req, res, next) {
@@ -135,6 +140,14 @@ module.exports = function(db) {
 			error: 'Not Found'
 		});
 	});
+
+    // The server understood the request, but is refusing to fulfill it. Authorization will not help and the request SHOULD NOT be repeated.
+    app.use(function(req, res){
+        res.status(403).render('theme/403', {
+            url : req.originalUrl,
+            error : 'Forbidden'
+        });
+    });
 
 	return app;
 };

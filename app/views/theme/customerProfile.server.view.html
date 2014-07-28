@@ -1,0 +1,19 @@
+{% extends 'layout2.server.view.html' %}
+
+{% block content %}
+<table class="table table-bordered">
+    <thead></thead>
+    <tbody>
+        <tr>
+            <td>Name</td><td>{{ customer.firstname }} {{ customer.lastname }}</td>
+        </tr>
+        <tr>
+            <td>Email</td><td>{{ customer.email }}</td>
+        </tr>
+        <tr>
+            <td>Update at</td><td>{{ customer.updated_at }}</td>
+        </tr>
+    </tbody>
+    <tfoot></tfoot>
+</table>
+{% endblock %}

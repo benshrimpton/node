@@ -10,7 +10,8 @@ var _ = require('lodash'),
 
 exports.index = function(req, res) {
 	res.render('theme/index', {
-		user: req.user || null
+		user: req.user || null,
+        customer : req.session.customer || null
 	});
 };
 

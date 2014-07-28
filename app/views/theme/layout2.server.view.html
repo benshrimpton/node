@@ -33,7 +33,7 @@
     <link href="/modules/core/img/brand/favicon.ico" rel="shortcut icon" type="image/x-icon">
 
     <!--Application CSS Files-->
-    {% for cssFile in cssFiles %}<link rel="stylesheet" href="{{cssFile}}">
+    {% for cssFile in cssFiles %}<link rel="stylesheet" href="{{host}}{{cssFile}}">
     {% endfor %}
 
     <!-- HTML5 Shim -->
@@ -43,7 +43,47 @@
 </head>
 
 <body>
-<header class="navbar navbar-fixed-top navbar-inverse"></header>
+<header>
+    <nav class="navbar navbar-default" role="navigation">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/">Splintr</a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                {% if !customer.length %}
+                <form class="navbar-form navbar-left form-inline" action="/customer/signin" action="post" role="form">
+                    <div class="form-group">
+                        <label class="sr-only" for="exampleInputEmail2">Email address</label>
+                        <input type="email" name="email" class="form-control" id="exampleInputEmail2" placeholder="Enter email">
+                    </div>
+                    <div class="form-group">
+                        <label class="sr-only" for="exampleInputPassword2">Password</label>
+                        <input type="password" name="password" class="form-control" id="exampleInputPassword2" placeholder="Password">
+                    </div>
+                    <button type="submit" class="btn btn-default">Sign in</button>
+                </form><!-- /.navbar-form -->
+                {% endif %}
+                <ul class="nav navbar-nav navbar-left">
+                    {% if !customer.length %}
+                    <li><a href="/customer/signup">Sign Up</a></li>
+                    {% else %}
+                    <li><a href="/customer/signout">Logout</a></li>
+                    {% endif %}
+                </ul>
+            </div><!-- /.navbar-collapse -->
+        </div><!-- /.container-fluid -->
+    </nav>
+
+</header><!-- /.navbar -->
 <section class="content">
     <section class="container">
         {% block content %}{% endblock %}
