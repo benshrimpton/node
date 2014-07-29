@@ -43,6 +43,33 @@ module.exports = function(app){
         .route('/customer/profile')
         .get(Customer.hasAuthorization, Customer.profile);
 
+    /*
+    * Create an address for a customer;
+    * Retrieve the customer's addresses
+    * **/
+    app
+        .route('/customer/address')
+        .get(Customer.hasAuthorization, Customer.customerAddressList)
+        .post(Customer.hasAuthorization, Customer.createCustomerAddress);
+
+
+    /*
+    * Retrieve the specified address of the customer
+    * Update the specified address of the customer
+    * **/
+    app
+        .route('/customer/address/:addressId')
+        .get(Customer.hasAuthorization, Customer.customerAddressDetail)
+        .post(Customer.hasAuthorization, Customer.updateCustomerAddress);
+
+
+    /*
+    * Delete the specified user's account.
+    * **/
+    app
+        .route('/customer/address/delete/:addressId')
+        .get(Customer.hasAuthorization, Customer.removeCustomerAddress);
+
 
     /*
     * Customer Logout Page
