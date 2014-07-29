@@ -39,7 +39,11 @@ var authenticate = function(password, hash, callback){
         callback(new Error('The type of the hashed password is invalid'));
     } else {
         var passwordArr = hash.split(':');
-        return callback(null, Crypto.createHash('md5').update(passwordArr[1]+password).digest('hex') === passwordArr[0]);
+        if ( typeof callback === 'function' ) {
+            return callback(null, Crypto.createHash('md5').update(passwordArr[1]+password).digest('hex') === passwordArr[0]);
+        } else {
+            return Crypto.createHash('md5').update(passwordArr[1]+password).digest('hex') === passwordArr[0]
+        }
     }
 };
 
@@ -145,6 +149,135 @@ exports.createCustomer = function(req, res){
 };
 
 /**
+ * Create an address for a customer.
+ * */
+exports.createCustomerAddress = function(req, res){
+
+    var customerId = req.session.customer.customer_id | req.session.customer.id;
+
+    global
+        .magento
+        .customerAddress
+        .create({
+            customerId : customerId,
+            addressData : req.body
+        }, function(err, customerAddressIds){
+            if (err) {
+                return res.send(500, {
+                    message : err.message
+                });
+            } else {
+                req.flash('successMsg', 'Your address has been created');
+                return res.redirect('/customer/profile');
+            }
+        });
+};
+
+/**
+ * Delete customer's address.
+ * */
+exports.removeCustomerAddress = function(req, res){
+
+    global
+        .magento
+        .customerAddress
+        .delete({
+            addressId : req.params.addressId
+        }, function(err, isDeleted){
+            if (err) {
+                return res.send(500, {
+                   message : err.message
+                });
+            } else {
+                var key = (isDeleted) ? 'successMsg' : 'failMsg';
+                var msg = (isDeleted) ? 'The address has been deleted.' : 'The address is failed to be deleted';
+                req.flash( key, msg );
+                return res.redirect('/customer/profile');
+            }
+        });
+
+};
+
+/**
+ * Render out all of the customer addresses
+ * */
+exports.customerAddressList = function(req, res){
+
+    var customerId = req.session.customer.customer_id | req.session.customer.id;
+
+    global
+        .magento
+        .customerAddress
+        .list({
+            customerId : customerId
+        }, function(err, customerAddresses){
+            if (err) {
+                return res.send(500, {
+                    message : err.message
+                });
+            } else {
+                return res.render('customerAddresses', {
+                    customerAddresses : customerAddresses
+                });
+            }
+        });
+};
+
+/**
+ * Render out customer detail
+ * */
+exports.customerAddressDetail = function(req, res){
+
+    global
+        .magento
+        .customerAddress
+        .info({
+            addressId : req.params.addressId
+        }, function(err, customerAddreses){
+            if (err) {
+                return res.send(500, {
+                    message : err.message
+                });
+            } else {
+                return res.render('customerAddress', {
+                    customerAddress : customerAddreses[0]
+                });
+            }
+        });
+
+};
+
+/**
+ * Update the customer detail.
+ * */
+exports.updateCustomerAddress = function(req, res){
+
+    global
+        .magento
+        .customerAddress
+        .update({
+            addressId : req.body.addressId,
+            addressData : req.body
+        }, function(err, isUpdated){
+            if (err) {
+                return res.send(500, {
+                    message : err.message
+                });
+            } else {
+                var key = (isUpdated) ? 'successMsg' : 'failMsg';
+                var msg = (isUpdated) ? 'The address has been updated.' : 'The address fails to update';
+                var obj = {};
+                obj['customerAddress'] = req.body;
+                obj[key] = msg
+                return res.render('customerAddress', obj);
+            }
+        });
+
+};
+
+
+
+/**
  * Obtain customer detail using customer id.
  * */
 exports.customerDetail = function(req, res){
@@ -221,7 +354,7 @@ exports.updateCustomer = function(req, res){
  * Customer Login
  * */
 exports.customerSignin = function(req, res){
-    if (req.session.customer === null) {
+    if (!req.session.customer) {
         if ( Validator.isEmail(req.body.email) === false ){
             return res.send(400, {
                 message  : req.body.email + ' is not a proper email addess'
@@ -229,15 +362,25 @@ exports.customerSignin = function(req, res){
         } else {
 
             var filter = {
-                'key' : 'email',
-                'value' : {
-                    'key' : 'eq',
-                    'email' : req.body.email
+                email : {
+                    eq : req.body.email
                 }
             };
 
+            var complexFilter = [{
+                complex_filter : [{
+                    key : 'email' ,
+                    value : [{
+                        key : 'eq',
+                        value : req.body.email
+                    }]
+                }]
+            }];
+
+
             global
                 .magento
+                .customer
                 .list({
                     filters : filter
                 }, function(err, customers){
@@ -252,7 +395,6 @@ exports.customerSignin = function(req, res){
                         req.flash('errorMsg', req.body.email + 'is not found');
                         res.redirect('/customer/login');
                     } else {
-                        console.log(customers);
                         if ( authenticate(req.body.password, customers[0].password_hash ) === true ) {
                             delete customers[0].password_hash;
                             req.session.customer = customers[0];
@@ -286,7 +428,7 @@ exports.customerSignin = function(req, res){
 /**
  * Logout the customer.
  * */
-exports.logout = function(req, res){
+exports.signout = function(req, res){
     delete req.session.customer;
     return res.redirect('/');
 };
@@ -309,11 +451,13 @@ exports.signin = function(req, res){
  * Customer Profile Page
  * */
 exports.profile = function(req, res){
+    var customerId = (typeof req.session.customer.customer_id !== 'undefined' ) ? req.session.customer.customer_id : req.session.customer.id;
+    console.log(customerId);
     global
         .magento
         .customer
         .info({
-            customerId : req.session.customer.customer_id | req.session.customer.id
+            customerId : customerId
         }, function(err, customers){
             if (err) {
                 return res.send(500, {
@@ -328,7 +472,8 @@ exports.profile = function(req, res){
 
 
                 res.render('theme/customerProfile', {
-                    customer : customers
+                    customer : customers,
+                    successMsg : req.flash('successMsg')
                 });
             }
         });

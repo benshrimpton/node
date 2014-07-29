@@ -68,6 +68,14 @@ module.exports.getJavaScriptAssets = function(includeTests) {
 };
 
 /**
+ * Get the modules basic Javascript files.
+ * */
+module.exports.getNonAngularJavascriptAssets = function(){
+    var output = this.getGlobbedFiles(this.assets.lib.basicJs, 'public/');
+    return output;
+}
+
+/**
  * Get the modules CSS files
  */
 module.exports.getCSSAssets = function() {

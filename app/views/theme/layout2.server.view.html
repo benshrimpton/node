@@ -60,7 +60,7 @@
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 {% if !customer %}
-                <form class="navbar-form navbar-left form-inline" action="/customer/signin" action="post" role="form">
+                <form class="navbar-form navbar-left form-inline" action="/customer/signin" method="post" role="form">
                     <div class="form-group">
                         <label class="sr-only" for="exampleInputEmail2">Email address</label>
                         <input type="email" name="email" class="form-control" id="exampleInputEmail2" placeholder="Enter email">
@@ -94,6 +94,10 @@
 <script type="text/javascript">
     var user = {{ user | json | safe }};
 </script>
+
+<!-- Application Javascript Files -->
+{% for jsFile in basicJsFiles %}<script type="text/javascript" src="{{host}}{{jsFile}}"></script>
+{% endfor %}
 
 {% if process.env.NODE_ENV === 'development' %}
 <!--Livereload script rendered -->

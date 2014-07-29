@@ -36,6 +36,7 @@ module.exports = function(db) {
 	app.locals.facebookAppId = config.facebook.clientID;
     app.locals.jsFiles =  config.getJavaScriptAssets();
     app.locals.cssFiles = config.getCSSAssets();
+    app.locals.basicJsFiles = config.getNonAngularJavascriptAssets();
 
     app.use(function(req, res, next){
         res.locals.host = req.protocol + '://' + req.get('host') +  '/';
@@ -91,6 +92,7 @@ module.exports = function(db) {
 	// Express MongoDB session storage
 	app.use(session({
 		secret: config.sessionSecret,
+        auto_reconnect : true,
 		store: new mongoStore({
 			db: db.connection.db,
 			collection: config.sessionCollection
@@ -146,6 +148,13 @@ module.exports = function(db) {
         res.status(403).render('theme/403', {
             url : req.originalUrl,
             error : 'Forbidden'
+        });
+    });
+
+    app.use(function(req, res){
+        res.status(401).render('theme/401', {
+            url : req.originalUrl,
+            error : 'Unauthorized'
         });
     });
 

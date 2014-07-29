@@ -41,7 +41,7 @@ module.exports = function(app){
     * **/
     app
         .route('/customer/profile')
-        .get(Customer.profile);
+        .get(Customer.hasAuthorization, Customer.profile);
 
 
     /*
@@ -49,7 +49,7 @@ module.exports = function(app){
     * **/
     app
         .route('/customer/signout')
-        .get(Customer.logout);
+        .get(Customer.signout);
 
 
 
