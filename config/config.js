@@ -68,6 +68,14 @@ module.exports.getJavaScriptAssets = function(includeTests) {
 };
 
 /**
+ * Get the module theme CSS files
+ * */
+module.exports.getThemeCSSAssets = function(){
+  var output = this.getGlobbedFiles(this.assets.lib.css.concat(this.assets.lib.themeCSS), 'public/');
+  return output;
+};
+
+/**
  * Get the modules basic Javascript files.
  * */
 module.exports.getNonAngularJavascriptAssets = function(){

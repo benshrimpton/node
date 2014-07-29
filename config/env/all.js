@@ -24,6 +24,9 @@ module.exports = {
 				'public/lib/angular-ui-utils/ui-utils.js',
 				'public/lib/angular-bootstrap/ui-bootstrap-tpls.js'
 			],
+            themeCSS : [
+
+            ],
             basicJs : [
                 'public/lib/jquery/dist/jquery.js',
                 'public/lib/bootstrap/dist/js/bootstrap.js'
