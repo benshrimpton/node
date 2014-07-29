@@ -53,22 +53,18 @@
                     </td>
                             
 
-                                        <td class="retail-price">
-                    €45.48
-                </td>
+                                        <td class="retail-price">{{product.price}}</td>
             
-            <td class="updated-at">
-                2014/01/29
-            </td>
+            <td class="updated-at">{{product.updated_at}}</td>
             <td class="actions">
                <div class="btn-group">
-                    <a class="btn btn-sm btn-default" href="#" title="Clone" data-toggle="tooltip">
+                    <a class="btn btn-sm btn-default" href="#!/products/clone/{{product.sku}}" title="Clone" data-toggle="tooltip">
                         <span class="glyphicon glyphicon-share"></span> 
                  </a>
-                    <a class="btn btn-sm btn-default" href="#t" title="Edit" data-toggle="tooltip">
+                    <a class="btn btn-sm btn-default" href="#!/products/edit/{{product.sku}}" title="Edit" data-toggle="tooltip">
                         <span class="glyphicon glyphicon-pencil"></span> Edit
                     </a>
-                    <a class="btn btn-sm btn-default " href="#" title="Delete" data-toggle="tooltip">
+                    <a class="btn btn-sm btn-default " href="#!/products/delete/{{product.sku}}" title="Delete" data-toggle="tooltip">
                         <span class="glyphicon glyphicon-trash"></span> 
                     </a>
                 </div>
