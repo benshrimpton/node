@@ -44,18 +44,21 @@
 
 <body class="ng-cloak">
 
-	<header data-ng-include="'/modules/core/views/header.client.view.html'" class="navbar navbar-fixed-top navbar-inverse"></header>
+	<header data-ng-include="'/modules/core/views/header.client.view.html'" class="navbar navbar-default navbar-fixed-top"></header>
 
 	<section class="content container-fluid">
 		<section class="row">
-		<aside class="col-sm-2">
+		<aside class="col-sm-2 left-sidebar">
 			<ul class="nav nav-pills nav-stacked">
-				<li class="active"><a href="#"><span class="glyphicon glyphicon-inbox"></span>&nbsp;Products</a></li>">Orders</a></li>
-				<li><a href="#">Customers</a></li>
-				<li><a href="#">Categories</a></li>
+				<li class="active">
+					<a href="#"><span class="glyphicon glyphicon-inbox"></span>&nbsp; Products</a>
+					</li>
+				<li><a href="#"><span class="glyphicon glyphicon-folder-open"></span>&nbsp; Orders</a></li>
+				<li><a href="#"><span class="glyphicon glyphicon-user"></span>&nbsp; Customers</a></li>
+				<li><a href="#"><span class="glyphicon glyphicon-th-list"></span>&nbsp; Categories</a></li>
 			</ul>
 		</aside>
-		<div class="col-sm-10">
+		<div class="col-sm-10 main">
 			{% block content %}{% endblock %}
 		</div>
 		</section>
