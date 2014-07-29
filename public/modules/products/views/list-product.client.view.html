@@ -2,8 +2,8 @@
 <h2 class="page-header"><span class="glyphicon glyphicon-inbox"></span>&nbsp; Products</h2>
 
 
-<!-- USE A A SEARCH / FILERT AREA -->
-<div class="container-fluid">
+<!-- USE A A SEARCH / FILTER AREA -->
+<div class="container-fluid search-bar">
     <div class="row">
         <div class="col-sm-4 ">
             <label>Search</label><input type="search" class="form-control">
@@ -12,12 +12,10 @@
              <label>Filter</label><input type="search" class="form-control">
         </div>
         <div class="col-sm-4">
-             <label>Do somthing</label><input type="search" class="form-control">
+             <label>Do something</label><input type="search" class="form-control">
         </div>
     </div> 
 </div>
-
-
 
 
 <!-- This is the dev table -->
@@ -28,6 +26,9 @@
         <tr>
             <th class="id">
                 <a href="#####">SKU<span class="glyphicon glyphicon-chevron-up"></span></a>
+            </th>
+            <th>
+                <a href="###">Image</a>
             </th>
             <th>
                 <a href="#">Name</a>
@@ -44,27 +45,29 @@
             <th>
                 Modify Product
             </th>
+
+
         </tr>
     </thead>
     
     <tbody>
             <tr id="9472" data-ng-repeat="product in products">
             <td class="id">
-                {{product.sku}}
+               <code class="sku">{{product.sku}}</code>
+            </td>
+            <td class="product-images">
+                <img src="{{product.product_media[0].url}}" height="60" alt="" >
             </td>
             <td>
                 <div class="media">
                  <a href="#!/products/{{product.sku}}" class="pull-left" title="View {{product.name}} details">
-                        <img src="{{product.product_media[0].url}}" height="60" alt="" >
+                        
                     </a>
                 <h5 class="media-heading">
                     <a data-ng-href="#!/products/{{product.sku}}" class="name" title="View {{product.name}} details">
                         {{product.name}}
                     </a>
                     </h5>
-                        <div class="media-body">
-                                                            <strong>SKU: </strong> <code class="sku">{{product.sku}}</code>
-                                                    </div>
                     </div>
                 </div>
             </td>
@@ -95,24 +98,4 @@
 </section>
 
 
-
-
-<!-- This is the working table -->
-
-<table class="table table-striped">
-    <thead>
-        
-    <th class="page-header">
-        <h1>Products</h1>
-    </th>
-    </thead>
-    <tr class="list-group" data-ng-repeat="product in products">
-    <td>
-        <a data-ng-href="#!/products/{{product.sku}}" class="list-group-item"><h2>{{product.name}}</h2></a>
-            <img src="{{ product.product_media[0].url }}" height="60" />
-            <p class="list-group-item-text" data-ng-bind="product.short_description"></p>
-            <p class="list-group-item-text"><b>{{product.price}}</b></p>
-    </td>
-    </tr>
-</table>
 </div>

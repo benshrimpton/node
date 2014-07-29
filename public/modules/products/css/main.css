@@ -1,4 +1,4 @@
-/*Bootstrap overdies
+/*Bootstrap overrides
 We put these here so if we upgrade core bootstrap; we wont have to change that again*/
 .container-fluid {
     margin: 0;
@@ -90,5 +90,7 @@ table, .table {
 }
 
 
-
-
+/*  PRODUCTS              */
+.search-bar {
+    margin-bottom: 25px;
+}
