@@ -427,6 +427,19 @@ exports.getProducts = function(req, res){
     });
 };
 
+
+exports.getCategory = function(req, res){
+    Category.find({}, function(err, categories){
+        if (err) {
+            return res.send(500, {
+                message : err.message
+            });
+        } else {
+            res.jsonp(categories);
+        }
+    });
+};
+
 /*
 * Get the product using its SKU
 *

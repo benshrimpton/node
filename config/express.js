@@ -122,27 +122,6 @@ module.exports = function(db) {
 		require(path.resolve(routePath))(app);
 	});
 
-	// Assume 'not found' in the error msgs is a 404. this is somewhat silly, but valid, you can do whatever you like, set properties, use instanceof etc.
-	app.use(function(err, req, res, next) {
-		// If the error object doesn't exists
-		if (!err) return next();
-
-		// Log it
-		console.error(err.stack);
-
-		// Error page
-		res.status(500).render('theme/500', {
-			error: err.stack
-		});
-	});
-
-	// Assume 404 since no middleware responded
-	app.use(function(req, res) {
-		res.status(404).render('theme/404', {
-			url: req.originalUrl,
-			error: 'Not Found'
-		});
-	});
 
     // The server understood the request, but is refusing to fulfill it. Authorization will not help and the request SHOULD NOT be repeated.
     app.use(function(req, res){
@@ -158,6 +137,28 @@ module.exports = function(db) {
             error : 'Unauthorized'
         });
     });
+
+    // Assume 'not found' in the error msgs is a 404. this is somewhat silly, but valid, you can do whatever you like, set properties, use instanceof etc.
+    app.use(function(err, req, res, next) {
+        // If the error object doesn't exists
+        if (!err) return next();
+
+        // Log it
+        console.error(err.stack);
+
+        // Error page
+        res.status(500).render('theme/500', {
+            error: err.stack
+        });
+    });
+
+	// Assume 404 since no middleware responded
+	app.use(function(req, res) {
+		res.status(404).render('theme/404', {
+			url: req.originalUrl,
+			error: 'Not Found'
+		});
+	});
 
 	return app;
 };
