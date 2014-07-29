@@ -21,13 +21,14 @@ We put these here so if we upgrade core bootstrap; we wont have to change that a
 .navbar-default .navbar-brand {
     color: white !important;
 }
+.page-header {
+    margin: 0 0 20px 0;
+}
 .row {
     margin-left: 0px;
     margin-right: 0pc;
 }
-.nav-pills > li > a {
-    border-radius: 0px;
-}
+/* ################## END BOOTSTRAP OVERIDES ################## */
 body {
     padding-top: 50px;
     line-height: 18px;
