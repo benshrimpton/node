@@ -59,3 +59,8 @@ ul, ol, li {
     right: 0;
     display: none;
 }
+
+
+table, .table {
+    width: 99%;
+}

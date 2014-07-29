@@ -1,5 +1,19 @@
 <div data-ng-controller="ProductsController" data-ng-init="find()">
 
+<!-- USE A A SEARCH / FILERT AREA -->
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-4">
+            <label>Search</label><input type="search">
+        </div>
+        <div class="col-sm-4">
+             <label>Filter</label><input type="search">
+        </div>
+        <div class="col-sm-4">
+             <label>Do somthing</label><input type="search">
+        </div>
+    </div> 
+</div>
 <!-- This is the dev table -->
 <section class="row">
     
@@ -9,19 +23,19 @@
             <th class="id">
                 <a href="#####">SKU<span class="glyphicon glyphicon-chevron-up"></span></a>
             </th>
-            <th class="info">
+            <th>
                 <a href="#">Name</a>
             </th>
-            <th class="stock">
+            <th>
                 Current stock
             </th>
-            <th class="retail-price">
+            <th>
                 Retail price
             </th>
-            <th class="updated-at">
+            <th>
                 <a href="#">Updated On</a>
             </th>
-            <th class="actions">
+            <th>
                 Modify Product
             </th>
         </tr>
@@ -32,7 +46,7 @@
             <td class="id">
                 {{product.sku}}
             </td>
-            <td class="info">
+            <td>
                 <div class="media">
                  <a href="#!/products/{{product.sku}}" class="pull-left" title="View {{product.name}} details">
                         <img src="{{product.product_media[0].url}}" height="60" alt="" >
