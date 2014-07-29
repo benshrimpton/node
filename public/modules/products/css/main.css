@@ -1,17 +1,40 @@
 /*Bootstrap overdies
 We put these here so if we upgrade core bootstrap; we wont have to change that again*/
+.container-fluid {
+    margin: 0;
+    padding: 0;
+}
+.navbar-default .container-fluid {
+    padding-right: 15px;
+    padding-left: 15px;
+}
 
+.navbar-default {
+    background: #272c30;
+    border-color: #272c30;
+    color: white;
+}
+.navbar-default a {
+    color: silver !important;
+    text-shadow: none;
+}
+.navbar-default .navbar-brand {
+    color: white !important;
+}
+.page-header {
+    margin: 0 0 20px 0;
+}
 .row {
-margin-left: 0px;
-margin-right: 0pc;
-    }
-
+    margin-left: 0px;
+    margin-right: 0pc;
+}
+/* ################## END BOOTSTRAP OVERIDES ################## */
 body {
-padding-top: 50px;
-line-height: 18px;
-font-size: 13px;
-color: #444;
-font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    padding-top: 50px;
+    line-height: 18px;
+    font-size: 13px;
+    color: #444;
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
 }
 table , .table{
     width: auto;
@@ -25,29 +48,30 @@ ul, ol, li {
     padding: 0 40px 0 0;
 }
 .left-sidebar {
-    position: fixed;
-    top: 50px;
-    bottom: 0;
-    width: 178px;
     overflow: hidden;
     padding: 10px 0;
     z-index: 220;
     background: #f2f7fa;
-    box-shadow: -1px 0 0 #DDE2EB inset;
-    /* -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box; */
+    background: #31373d;
+    padding: 20px;
+    position: fixed;
+    bottom: 0;
+    top: 50px;
+    height: 100%;
+}
+.left-sidebar a {
+    color: #96a7b6;
 }
 .breadcrumb-wrapper {
     background-color: #F5F5F5;
     margin-top: 0;
     margin-left: -15px;
 }
-#main {
-    margin-left: 178px;
+.main {
+    margin-left: 16.66666667%;
     height: 100%;
-    min-height: 1000px;
-    padding: 0 15px;
+    min-height: 600px;
+    padding: 20px 15px;
 
 }
 .main-footer {
@@ -59,3 +83,12 @@ ul, ol, li {
     right: 0;
     display: none;
 }
+
+
+table, .table {
+    width: 99%;
+}
+
+
+
+
