@@ -5,6 +5,18 @@ Splintr is a middleware for Magento built with a MEAN stack, which provides a st
 ##Important 
 For more information, please visit meanjs.org. 
 
+Run 
+```
+$ sudo npm install 
+```
+everything pull down a request. 
+Then , access the following links to retrieve required data from Magento. 
+1. /magento/sync/store
+2. /customergroup/sync
+
+Note: It should be enough to run Splintr for now. 
+
+
 ## Getting Started With MEAN.JS
 You have your application running but there are a lot of stuff to understand, we recommend you'll go over the [Offical Documentation](http://meanjs.org/docs.html). 
 In the docs we'll try to explain both general concepts of MEAN components and give you some guidelines to help you improve your development procees. We tried covering as many aspects as possible, and will keep update it by your request, you can also help us develop the documentation better by checking out the *gh-pages* branch of this repository.
