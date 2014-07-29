@@ -73,7 +73,7 @@
                 </form><!-- /.navbar-form -->
                 {% endif %}
                 <ul class="nav navbar-nav navbar-left">
-                    {% if !customer.length %}
+                    {% if !customer %}
                     <li><a href="/customer/signup">Sign Up</a></li>
                     {% else %}
                     <li><a href="/customer/signout">Logout</a></li>
