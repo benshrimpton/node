@@ -433,6 +433,7 @@ exports.getProducts = function(req, res){
 * @return JSON product
 * */
 exports.getProductBySKU = function(req, res){
+    console.log(req.product);
     res.jsonp(req.product);
 };
 

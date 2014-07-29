@@ -32,6 +32,7 @@ module.exports = function(app){
     * Retrieve the detail of the product using SKU
     * */
     app.route('/magento/product/:productSKU')
+        .get(product.getProductBySKU);
 
 
     //Binding the product with middleware

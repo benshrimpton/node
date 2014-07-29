@@ -1,0 +1,16 @@
+<table data-ng-controller="ProductsController" data-ng-init="findOne()" class="table table-striped">
+    <thead>
+        
+    <th class="page-header">
+        <h1><a data-ng-href="#!/products">Products</a></h1>
+    </th>
+    </thead>
+    <tr class="list-group">
+    <td>
+        <a data-ng-href="#!/products/{{product.sku}}" class="list-group-item"><h2>{{product.name}}</h2></a>
+            <img src="{{ product.product_media[0].url }}" height="60" />
+            <p class="list-group-item-text" data-ng-bind="product.short_description"></p>
+            <p class="list-group-item-text">Price: ${{product.price}}</p>
+    </td>
+    </tr>
+</table>

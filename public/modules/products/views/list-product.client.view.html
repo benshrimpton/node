@@ -1,4 +1,89 @@
-<table data-ng-controller="ProductsController" data-ng-init="find()" class="table table-striped">
+<div data-ng-controller="ProductsController" data-ng-init="find()">
+
+<!-- This is the dev table -->
+<section class="row">
+    
+    <table class="sylius-products-table table table-striped table-bordered">
+    <thead>
+        <tr>
+            <th class="id">
+                <a href="#####">SKU<span class="glyphicon glyphicon-chevron-up"></span></a>
+            </th>
+            <th class="info">
+                <a href="#">Name</a>
+            </th>
+            <th class="stock">
+                Current stock
+            </th>
+            <th class="retail-price">
+                Retail price
+            </th>
+            <th class="updated-at">
+                <a href="#">Updated On</a>
+            </th>
+            <th class="actions">
+                Modify Product
+            </th>
+        </tr>
+    </thead>
+    
+    <tbody>
+            <tr id="9472" data-ng-repeat="product in products">
+            <td class="id">
+                {{product.sku}}
+            </td>
+            <td class="info">
+                <div class="media">
+                 <a href="#!/products/{{product.sku}}" class="pull-left" title="View {{product.name}} details">
+                        <img src="{{product.product_media[0].url}}" height="60" alt="" >
+                    </a>
+                <h5 class="media-heading">
+                    <a data-ng-href="#!/products/{{product.sku}}" class="name" title="View {{product.name}} details">
+                        {{product.name}}
+                    </a>
+                    </h5>
+                        <div class="media-body">
+                                                            <strong>SKU: </strong> <code class="sku">{{product.sku}}</code>
+                                                    </div>
+                    </div>
+                </div>
+            </td>
+                                                <td class="stock out-of-stock text-muted">
+                        <em>Out of stock</em>
+                    </td>
+                            
+
+                                        <td class="retail-price">
+                    €45.48
+                </td>
+            
+            <td class="updated-at">
+                2014/01/29
+            </td>
+            <td class="actions">
+               <div class="btn-group">
+                    <a class="btn btn-sm btn-default" href="#" title="Clone" data-toggle="tooltip">
+                        <span class="glyphicon glyphicon-share"></span> 
+                 </a>
+                    <a class="btn btn-sm btn-default" href="#t" title="Edit" data-toggle="tooltip">
+                        <span class="glyphicon glyphicon-pencil"></span> Edit
+                    </a>
+                    <a class="btn btn-sm btn-default " href="#" title="Delete" data-toggle="tooltip">
+                        <span class="glyphicon glyphicon-trash"></span> 
+                    </a>
+                </div>
+                            </td>
+        </tr>
+        </tbody>
+</table>
+</section>
+
+
+
+
+<!-- This is the working table -->
+
+<table class="table table-striped">
     <thead>
         
     <th class="page-header">
@@ -7,10 +92,11 @@
     </thead>
     <tr class="list-group" data-ng-repeat="product in products">
     <td>
-        <a data-ng-href="#!/articles/{{product.product_id}}" class="list-group-item"><h2>{{product.name}}</h2></a>
+        <a data-ng-href="#!/products/{{product.sku}}" class="list-group-item"><h2>{{product.name}}</h2></a>
             <img src="{{ product.product_media[0].url }}" height="60" />
             <p class="list-group-item-text" data-ng-bind="product.short_description"></p>
             <p class="list-group-item-text"><b>{{product.price}}</b></p>
     </td>
     </tr>
 </table>
+</div>

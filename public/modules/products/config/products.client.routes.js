@@ -13,7 +13,7 @@ angular.module('products').config(['$stateProvider',
                 templateUrl: 'modules/products/views/list-product.client.view.html'
             }).
             state('viewProduct', {
-                url: '/products/:productId',
+                url: '/products/:productSKU',
                 templateUrl: 'modules/products/views/view-product.client.view.html'
             });
     }
