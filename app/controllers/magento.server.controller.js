@@ -10,6 +10,7 @@
 var Promise = require('bluebird'),
     mongoose = require('mongoose'),
     MagentoStore = mongoose.model('Store'),
+    Country = mongoose.model('Country'),
     async = require('async'),
     _ = require('lodash');
 
@@ -74,5 +75,73 @@ exports.syncStore = function(req, res){
 
     });
 
+};
+
+
+
+exports.syncCountryRegion = function(req, res){
+
+    async.parallel([
+        function(callback){
+            Country
+                .find({})
+                .remove()
+                .exec(function(err){
+                    callback(err);
+                });
+        },
+        function(callback){
+            Region
+                .find({})
+                .remove()
+                .exec(function(err){
+                    callback(err);
+                });
+        }
+    ], function(err, results){
+        if (err) {
+            return res.send(500, {
+                message  : err.message
+            });
+        } else {
+            global
+                .magento
+                .directoryCountry
+                .list(function(err, countries){
+                    if (err) {
+                        return res.send(500, {
+                            message  : err.message
+                        })
+                    } else {
+                        for(var i = 0; i < countries.length; i++){
+
+                            global
+                                .magento
+                                .directoryRegion
+                                .list(function(err, regions){
+                                    if (err) {
+                                        return res.send(500, {
+                                            message : err.message
+                                        });
+                                    } else {
+                                        var country = new Country(countries[i]);
+                                        country.save(function(err){
+                                            if (err) {
+                                                return res.send(500, {
+                                                    message : err.message
+                                                });
+                                            } else {
+                                                return res.send(200, {
+                                                    message : 'It has been sync'
+                                                });
+                                            }
+                                        });
+                                    }
+                                });
+                        }
+                    }
+                });
+        }
+    });
 
 };
