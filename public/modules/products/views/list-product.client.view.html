@@ -56,31 +56,35 @@
             <td class="id">
                 <input type="checkbox">
             </td>
-            <td class="id">
-                {{product.sku}}
-            </td>
-            <td>
+
+              <td>
                 <div class="media">
                  <a href="#!/products/{{product.sku}}" class="pull-left" title="View {{product.name}} details">
-                        <img src="{{product.product_media[0].url}}" height="60" alt="" >
+                        <img src="{{product.product_media[0].url}}" height="120" alt="" >
                     </a>
-                <h5 class="media-heading">
+                    <h5 class="media-heading">
                     <a data-ng-href="#!/products/{{product.sku}}" class="name" title="View {{product.name}} details">
                         {{product.name}}
                     </a>
                     </h5>
                         <div class="media-body">
-                                                            <strong>SKU: </strong> <code class="sku">{{product.sku}}</code>
-                                                    </div>
+                            <strong>SKU: </strong> <code class="sku">{{product.sku}}</code>
+                        </div>
                     </div>
                 </div>
             </td>
-                                                <td class="stock out-of-stock text-muted">
-                        <em>Out of stock</em>
-                    </td>
+
+
+            <td class="id">
+                {{product.sku}}
+            </td>
+          
+            <td class="stock out-of-stock text-muted">
+                  <em>Out of stock</em>
+            </td>
                             
 
-                                        <td class="retail-price">{{product.price}}</td>
+        <td class="retail-price">{{product.price}}</td>
             
             <td class="updated-at">{{product.updated_at}}</td>
             <td class="actions">
