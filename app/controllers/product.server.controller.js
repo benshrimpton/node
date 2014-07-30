@@ -81,16 +81,40 @@ var saveCategoryById = function(categoryId, cb){
  * */
 var synchCategory = function(cb){
 //    var arr = new Array();
-    Product.find({}, function(err , products){
-        if (err) return cb(err);
-        //retrieve all categories in the database
-        for(var i = 0; i < products.length; i++){
-            for(var j = 0; j < products[i].categories.length; j++){
-                saveCategoryById(products[i].categories[j])
+//    Product.find({}, function(err , products){
+//        if (err) return cb(err);
+//        //retrieve all categories in the database
+//        for(var i = 0; i < products.length; i++){
+//            for(var j = 0; j < products[i].categories.length; j++){
+//                saveCategoryById(products[i].categories[j])
+//            }
+//        }
+//        cb(null, products);
+//    });
+
+    Category
+        .find({})
+        .remove()
+        .exec(function(err){
+            if (err) {
+                return cb(err);
+            } else {
+                Product
+                    .find({}, function(err, products){
+                        if (err) {
+                            return cb(err)
+                        } else {
+                            for(var i = 0; i < products.length; i++){
+                                for(var j = 0; j < products[i].categories.length; j++){
+                                    saveCategoryById(products[i].categories[j])
+                                }
+                            }
+                            cb(null, products);
+                        }
+                    });
             }
-        }
-        cb(null, products);
-    });
+        });
+
 };
 
 /**
