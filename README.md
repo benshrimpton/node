@@ -13,6 +13,8 @@ everything pull down a request.
 Then , access the following links to retrieve required data from Magento. 
 1. /magento/sync/store
 2. /customergroup/sync
+3. /magento/sync/category
+4. /magento/sync/product
 
 Note: It should be enough to run Splintr for now. 
 
