@@ -44,6 +44,13 @@ module.exports = function(app){
         .get(Customer.hasAuthorization, Customer.profile);
 
     /*
+    * Customer Address page.
+    * **/
+    app
+        .route('/customer/address/new')
+        .get(Customer.hasAuthorization, Customer.customerAddressCreatePage);
+
+    /*
     * Create an address for a customer;
     * Retrieve the customer's addresses
     * **/

@@ -79,9 +79,12 @@ exports.syncStore = function(req, res){
 
 
 
+/**
+ * Sync country and region.
+ * */
 exports.syncCountryRegion = function(req, res){
 
-    async.parallel([
+    async.waterfall([
         function(callback){
             Country
                 .find({})
@@ -91,57 +94,116 @@ exports.syncCountryRegion = function(req, res){
                 });
         },
         function(callback){
-            Region
-                .find({})
-                .remove()
-                .exec(function(err){
-                    callback(err);
-                });
-        }
-    ], function(err, results){
-        if (err) {
-            return res.send(500, {
-                message  : err.message
-            });
-        } else {
             global
                 .magento
                 .directoryCountry
                 .list(function(err, countries){
                     if (err) {
-                        return res.send(500, {
-                            message  : err.message
-                        })
+                        callback(err);
                     } else {
-                        for(var i = 0; i < countries.length; i++){
-
-                            global
-                                .magento
-                                .directoryRegion
-                                .list(function(err, regions){
-                                    if (err) {
-                                        return res.send(500, {
-                                            message : err.message
-                                        });
-                                    } else {
-                                        var country = new Country(countries[i]);
-                                        country.save(function(err){
-                                            if (err) {
-                                                return res.send(500, {
-                                                    message : err.message
-                                                });
-                                            } else {
-                                                return res.send(200, {
-                                                    message : 'It has been sync'
-                                                });
-                                            }
-                                        });
-                                    }
-                                });
-                        }
+                        //console.log(countries);
+                        callback(null, countries)
                     }
                 });
+        },
+        function(countries, callback){
+            async.each(countries, function(country, callback){
+                var obj = {
+                    name : country.name,
+                    iso2_code : country.iso2_code,
+                    iso3_code : country.iso3_code,
+                    country_id : country.country_id,
+                };
+                global
+                    .magento
+                    .directoryRegion
+                    .list({
+                        country : country.iso3_code
+                    }, function(err, regions){
+                        if (err) {
+                            callback(err);
+                        } else {
+                            obj.regions = regions;
+                            console.log(obj);
+                            var country = new Country(obj);
+                            country.save(function(err){
+                                callback(err);
+                            });
+                        }
+                    });
+            }, function(err){
+                if (err) {
+                    callback(err);
+                } else {
+                    callback(null);
+                }
+            });
+        }
+    ], function(err, results){
+        if (err) {
+            return res.send(500, {
+                err : err.message
+            });
+        } else {
+            return res.send(200, {
+                message : 'awesome'
+            });
         }
     });
 
+};
+
+/**
+ * Retrieve the store details
+ * */
+exports.getStoreDetail = function(req, res){
+    MagentoStore
+        .find({})
+        .exec(function(err, stores){
+            if (err) {
+                return res.send(500, {
+                   message : err.message
+                });
+            } else {
+                return res.send(200, stores);
+            }
+        });
+};
+
+/**
+ * Retrieve all of the country and its regions.
+ * */
+exports.getCountryRegion = function(req, res){
+    Country
+        .find({})
+        .exec(function(err, countryRegion){
+            if (err) {
+                return res.send(500, {
+                    message : err.message
+                })
+            } else {
+                return res.send(200, countryRegion);
+            }
+        });
+};
+
+/**
+ * Retrieve regions using the country id.
+ * */
+exports.getRegionByCountryId = function(req, res){
+    Country
+        .findOne({ country_id : req.params.countryId  })
+        .exec(function(err, country){
+            if (err) {
+                res.send(500,{
+                    message : err.message
+                });
+            } else {
+                res.format({
+                    text : function(){
+                        res.jsonp(country.regions);
+                    }
+                });
+            }
+        });
 };
