@@ -2,14 +2,14 @@
 <h2 class="page-header"><span class="glyphicon glyphicon-inbox"></span>&nbsp; Products</h2>
 
 
-<!-- USE A A SEARCH / FILTER AREA -->
+<!-- SEARCH & FILTER AREA -->
 <div class="container-fluid search-bar">
     <div class="row">
         <div class="col-sm-4 ">
             <label>Search</label><input type="search" class="form-control">
         </div>
         <div class="col-sm-4">
-             <label>Filter</label><input type="search" class="form-control">
+             <label>Quick filter</label><input type="search" class="form-control" ng-model="searchText">
         </div>
         <div class="col-sm-4">
              <label>Do something</label><input type="search" class="form-control">
@@ -17,8 +17,7 @@
     </div> 
 </div>
 
-
-<!-- This is the dev table -->
+<!-- PRODUCTS TABLE -->
 <section class="row">
     
     <table class="sylius-products-table table table-striped table-bordered">
@@ -29,7 +28,7 @@
               <input type="checkbox">
               </th>
             <th>
-                <a href="#####">SKU<span class="glyphicon glyphicon-chevron-up"></span></a>
+                <a href="#####">SKU <span class="glyphicon glyphicon-chevron-up"></span></a>
             </th>
             <th>
                 <a href="###">Image</a>
@@ -55,31 +54,33 @@
     </thead>
     
     <tbody>
-            <tr data-ng-repeat="product in products">
+            <tr data-ng-repeat="product in products | filter:searchText">
             <td class="id">
                 <input type="checkbox">
             </td>
 
               <td>
                 <div class="media">
-                 <a href="#!/products/{{product.sku}}" class="pull-left" title="View {{product.name}} details">
-                        <img src="{{product.product_media[0].url}}" height="120" alt="" >
-                    </a>
-                    <h5 class="media-heading">
-                    <a data-ng-href="#!/products/{{product.sku}}" class="name" title="View {{product.name}} details">
-                        {{product.name}}
-                    </a>
-                    </h5>
                         <div class="media-body">
-                            <strong>SKU: </strong> <code class="sku">{{product.sku}}</code>
+                            <code class="sku">{{product.sku}}</code>
                         </div>
                     </div>
                 </div>
             </td>
 
+            <td>
+                <a href="#!/products/{{product.sku}}" class="pull-left" title="View {{product.name}} details">
+                        <img src="{{product.product_media[0].url}}" height="120" alt="" >
+                    </a>
+            </td>
+
 
             <td class="id">
-                {{product.sku}}
+                                    <h5 class="media-heading">
+                    <a data-ng-href="#!/products/{{product.sku}}" class="name" title="View {{product.name}} details">
+                        {{product.name}}
+                    </a>
+                    </h5>
             </td>
           
             <td class="stock out-of-stock text-muted">
