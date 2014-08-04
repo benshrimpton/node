@@ -139,7 +139,7 @@ exports.createCustomer = function(req, res){
  * */
 exports.createCustomerAddress = function(req, res){
 
-    var customerId = req.session.customer.customer_id | req.session.customer.id;
+    var customerId = req.session.customer.customer_id || req.session.customer.id;
 
     global
         .magento
@@ -176,7 +176,7 @@ exports.removeCustomerAddress = function(req, res){
                 });
             } else {
                 var key = (isDeleted) ? 'successMsg' : 'failMsg';
-                var msg = (isDeleted) ? 'The address has been deleted.' : 'The address is failed to be deleted';
+                var msg = (isDeleted) ? 'The address has been deleted.' : 'The address fails to be deleted';
                 req.flash( key, msg );
                 return res.redirect('/customer/profile');
             }
@@ -214,40 +214,60 @@ exports.customerAddressList = function(req, res){
  * */
 exports.customerAddressDetail = function(req, res){
 
-    global
-        .magento
-        .customerAddress
-        .info({
-            addressId : req.params.addressId
-        }, function(err, customerAddreses){
-            if (err) {
-                return res.send(500, {
-                    message : err.message
+    Async.parallel({
+        countries : function(callback){
+            Country
+                .find({})
+                .sort('name')
+                .exec(function(err, countries){
+                    callback(err, countries);
                 });
-            } else {
-                return res.render('theme/customer/customerAddressForm', {
-                    customerAddress : customerAddreses[0]
+        },
+        address : function(callback){
+            global
+                .magento
+                .customerAddress
+                .info({
+                    addressId : req.params.addressId
+                }, function(err, customerAddreses){
+                    customerAddreses.street = customerAddreses.street.split('\n');
+                    callback(err, customerAddreses);
                 });
-            }
-        });
+        }
+    }, function(err, results){
+        if (err) {
+            return res.send(500, {
+                message : err.message
+            });
+        } else {
+            return res.render('theme/customer/customerAddressForm', {
+                address : results.address,
+                countries : results.countries,
+                actionURL : '/customer/address/'+req.params.addressId
+            });
+        }
+    });
+
 
 };
 
 /**
- * Render out the customer address page
+ * Render out a new customer address form page
  * */
 exports.customerAddressCreatePage = function(req, res){
     Country
         .find({})
+        .sort('name')
         .exec(function(err, countries){
             if (err) {
                 return res.send(500, {
                     message : err.message
                 });
             } else {
-                res.render('customerAddressForm', {
+                res.render('theme/customer/customerAddressForm', {
                     customer : req.session.customer,
-                    countries : countries
+                    countries : countries,
+                    actionURL : '/customer/address/new'
                 });
             }
         });
@@ -258,12 +278,15 @@ exports.customerAddressCreatePage = function(req, res){
  * */
 exports.updateCustomerAddress = function(req, res){
 
+    console.log(req.body);
+    console.log(req.params.addressId);
+
     global
         .magento
         .customerAddress
         .update({
-            addressId : req.body.addressId,
-            addressData : req.body
+            addressId : req.params.addressId,
+            addressData : [req.body]
         }, function(err, isUpdated){
             if (err) {
                 return res.send(500, {
@@ -272,10 +295,9 @@ exports.updateCustomerAddress = function(req, res){
             } else {
                 var key = (isUpdated) ? 'successMsg' : 'failMsg';
                 var msg = (isUpdated) ? 'The address has been updated.' : 'The address fails to update';
-                var obj = {};
-                obj['customerAddress'] = req.body;
-                obj[key] = msg
-                return res.render('customerAddress', obj);
+                req.flash( key, msg );
+                console.log(isUpdated);
+                return res.redirect('/customer/profile');
             }
         });
 
@@ -459,30 +481,57 @@ exports.signin = function(req, res){
 exports.profile = function(req, res){
     var customerId = (typeof req.session.customer.customer_id !== 'undefined' ) ? req.session.customer.customer_id : req.session.customer.id;
     console.log(customerId);
-    global
-        .magento
-        .customer
-        .info({
-            customerId : customerId
-        }, function(err, customers){
-            if (err) {
-                return res.send(500, {
-                    message : err.message
-                })
-            } else {
 
-                delete customers.password_hash;
-                delete customers.confirmation;
-                delete customers.rp_token;
-                delete customers.rp_token_created_at;
+    Async.parallel({
+        customer : function(callback){
+            global
+                .magento
+                .customer
+                .info({
+                    customerId : customerId
+                }, function(err, customer){
+                    if (err) {
+                        return callback(err);
+                    } else {
 
+                        delete customer.password_hash;
+                        delete customer.confirmation;
+                        delete customer.rp_token;
+                        delete customer.rp_token_created_at;
 
-                res.render('theme/customer/customerProfile', {
-                    customer : customers,
-                    successMsg : req.flash('successMsg')
+                        return callback(null, customer);
+                    }
                 });
-            }
-        });
+        },
+        addresses : function(callback){
+            global
+                .magento
+                .customerAddress
+                .list({
+                    customerId : customerId
+                }, function(err, addresses){
+                    if (err) {
+                        return callback(err);
+                    } else {
+                        console.log(addresses)
+                        return callback(null, addresses);
+                    }
+                });
+        }
+    }, function(err, results){
+        if (err) {
+            return res.send(500, {
+                message : err.message
+            });
+        } else {
+            res.render('theme/customer/customerProfile', {
+                customer : results.customer,
+                addresses : results.addresses,
+                successMsg : req.flash('successMsg'),
+                failMsg : req.flash('failMsg')
+            });
+        }
+    });
 };
 
 /**

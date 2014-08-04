@@ -2,53 +2,47 @@
 
 {% block content %}
 
-<form class="form-horizontal" role="form">
-    <div class="form-group">
-        <label for="addressCustomerEmail" class="col-sm-2 control-label">Email</label>
-        <div class="col-sm-10">
-            <input type="email" class="form-control" id="addressCustomerEmail" name="email" placeholder="Your Email" value="{{customer.email}}" >
-        </div>
-    </div>
+<form class="form-horizontal" role="form" method="post" action="{{actionURL}}">
     <div class="form-group">
         <label for="addressCustomerFirstName" class="col-sm-2 control-label">First Name</label>
         <div class="col-sm-10">
-            <input type="text" class="form-control" id="addressCustomerFirstName" name="firstname" placeholder="Your First Name" value="{{customer.firstname}}" >
+            <input type="text" class="form-control" id="addressCustomerFirstName" name="firstname" placeholder="Your First Name" value="{% if address.firstname %}{{address.firstname}}{% else %}{{customer.firstname}}{% endif %}" >
         </div>
     </div>
     <div class="form-group">
         <label for="addressCustomerLastName" class="col-sm-2 control-label">Last Name</label>
         <div class="col-sm-10">
-            <input type="text" class="form-control" id="addressCustomerLastName" name="lastname" placeholder="Your Last Name" value="{{customer.lastname}}" >
+            <input type="text" class="form-control" id="addressCustomerLastName" name="lastname" placeholder="Your Last Name" value=" {% if address.lastname %}{{address.lastname}}{% else %}{{customer.lastname}}{% endif %} " >
         </div>
     </div>
     <div class="form-group">
         <label for="addressCustomerStreet1" class="col-sm-2 control-label">Street 1</label>
         <div class="col-sm-10">
-            <input type="text" class="form-control" id="addressCustomerStreet1" name="street" placeholder="Your Street Address" >
+            <input type="text" class="form-control" id="addressCustomerStreet1" name="street[]" placeholder="Your Street Address" value="{% if address.street[0] %}{{address.street[0]}}{% endif %}"  >
         </div>
     </div>
     <div class="form-group">
         <label for="addressCustomerStreet2" class="col-sm-2 control-label">Street 2</label>
         <div class="col-sm-10">
-            <input type="text" class="form-control" id="addressCustomerStreet2" name="street" placeholder="Your Apartment number, Studio number, etc"  >
+            <input type="text" class="form-control" id="addressCustomerStreet2" name="street[]" placeholder="Your Apartment number, Studio number, etc"  value="{% if address.street[1] %}{{address.street[1]}}{% endif %}" >
         </div>
     </div>
     <div class="form-group">
         <label for="addressCustomerZipcode" class="col-sm-2 control-label">Zipcode</label>
         <div class="col-sm-10">
-            <input type="text" class="form-control" id="addressCustomerZipcode" name="postcode" placeholder="Your zipcode" >
+            <input type="text" class="form-control" id="addressCustomerZipcode" name="postcode" placeholder="Your zipcode" value="{{address.postcode}}" >
         </div>
     </div>
     <div class="form-group">
         <label for="addressCustomerCity" class="col-sm-2 control-label">City</label>
         <div class="col-sm-10">
-            <input type="text" class="form-control" id="addressCustomerCity" name="city" placeholder="Your City" >
+            <input type="text" class="form-control" id="addressCustomerCity" name="city" placeholder="Your City" value="{{address.city}}" >
         </div>
     </div>
     <div class="form-group">
         <label for="addressCustomerRegion" class="col-sm-2 control-label">State/Region</label>
         <div class="col-sm-10">
-            <input type="text" class="form-control" id="addressCustomerRegion" name="region" placeholder="State" >
+            <input type="text" class="form-control" id="addressCustomerRegion" name="region" placeholder="State" value="{{address.region}}" >
         </div>
     </div>
     <div class="form-group">
@@ -56,7 +50,11 @@
         <div class="col-sm-10">
             <select class="form-control" id="addressCustomerCountry" name="country_id">
                 {% for country in countries %}
-                    <option value="{{ country.country_id }}" >{{ country.name }}</option>
+                    {% if country.country_id == address.country_id %}
+                        <option value="{{ country.country_id }}" selected >{{ country.name }}</option>
+                    {% else %}
+                        <option value="{{ country.country_id }}" >{{ country.name }}</option>
+                    {% endif %}
                 {% endfor %}
             </select>
         </div>
@@ -64,19 +62,19 @@
     <div class="form-group">
         <label for="addressCustomerTelephone" class="col-sm-2 control-label">Telephone</label>
         <div class="col-sm-10">
-            <input type="text" class="form-control" id="addressCustomerTelephone" name="telephone" placeholder="Your telephone" >
+            <input type="text" class="form-control" id="addressCustomerTelephone" name="telephone" placeholder="Your telephone" value="{{address.telephone}}" >
         </div>
     </div>
     <div class="form-group">
         <label for="addressCustomerBilling" class="col-sm-2 control-label">Is Default Billing</label>
         <div class="checkbox col-sm-10">
-            <input type="checkbox" id="addressCustomerBilling" >
+            <input name="is_default_billing" type="checkbox" value="true" id="addressCustomerBilling" {% if address.is_default_billing %} checked {% endif %} >
         </div>
     </div>
     <div class="form-group">
         <label for="addressCustomerShipping" class="col-sm-2 control-label">Is Default Shipping</label>
         <div class="checkbox col-sm-10">
-            <input type="checkbox" id="addressCustomerShipping" >
+            <input name="is_default_shipping" type="checkbox" value="true" id="addressCustomerShipping" {% if address.is_default_shipping %} checked {% endif %} >
         </div>
     </div>
     <div class="form-group">

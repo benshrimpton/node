@@ -3,19 +3,61 @@
 {% include "./partials/navbarProfile.server.view.html" %}
 
 {% block content %}
-<table class="table table-bordered">
-    <thead></thead>
-    <tbody>
-        <tr>
-            <td>Name</td><td>{{ customer.firstname }} {{ customer.lastname }}</td>
-        </tr>
-        <tr>
-            <td>Email</td><td>{{ customer.email }}</td>
-        </tr>
-        <tr>
-            <td>Update at</td><td>{{ customer.updated_at }}</td>
-        </tr>
-    </tbody>
-    <tfoot></tfoot>
-</table>
+<div class="row">
+    <div class="col-md-3">
+        <ul class="nav nav-pills nav-stacked">
+            <li><a href="#">Profile</a></li>
+            <li><a href="#">Address</a></li>
+        </ul>
+    </div>
+    <div class="col-md-9">
+        <table class="table table-bordered">
+            <thead></thead>
+            <tbody>
+            <tr>
+                <td>Name</td><td>{{ customer.firstname }} {{ customer.lastname }}</td>
+            </tr>
+            <tr>
+                <td>Email</td><td>{{ customer.email }}</td>
+            </tr>
+            <tr>
+                <td>Update at</td><td>{{ customer.updated_at }}</td>
+            </tr>
+            </tbody>
+            <tfoot></tfoot>
+        </table>
+
+        <div class="btn-group">
+            <a href="/customer/address/new" class="btn btn-default">Create Address</a>
+        </div>
+
+        {% if addresses.length %}
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <td>Street</td>
+                    <td>Is Default Shipping Address</td>
+                    <td>Is Default Billing Address</td>
+                    <td></td>
+                </tr>
+            </thead>
+            <tbody>
+                {% for address in addresses %}
+                <tr>
+                    <td>{{address.street}}</td>
+                    <td>{% if address.is_default_shipping %}Yes{% else %}No{% endif %}</td>
+                    <td>{% if address.is_default_billing %}Yes{% else %}No{% endif %}</td>
+                    <td>
+                        <a href="/customer/address/{{address.customer_address_id}}" class="btn btn-warning">Edit</a>
+                        <a href="/customer/address/delete/{{address.customer_address_id}}" class="btn btn-danger">Delete</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot></tfoot>
+        </table>
+        {% endif %}
+
+    </div>
+</div>
 {% endblock %}

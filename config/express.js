@@ -125,16 +125,18 @@ module.exports = function(db) {
 
     // The server understood the request, but is refusing to fulfill it. Authorization will not help and the request SHOULD NOT be repeated.
     app.use(function(req, res){
-        res.status(403).render('theme/error/403', {
+        res.status(403).render('theme/error', {
             url : req.originalUrl,
-            error : 'Forbidden'
+            error : 'Forbidden',
+            statusCode : 403
         });
     });
 
     app.use(function(req, res){
-        res.status(401).render('theme/error/401', {
+        res.status(401).render('theme/error', {
             url : req.originalUrl,
-            error : 'Unauthorized'
+            error : 'Unauthorized',
+            statusCode : 401
         });
     });
 
@@ -147,15 +149,17 @@ module.exports = function(db) {
         console.error(err.stack);
 
         // Error page
-        res.status(500).render('theme/error/500', {
-            error: err.stack
+        res.status(500).render('theme/error', {
+            error: err.stack,
+            statusCode : 500
         });
     });
 
 	// Assume 404 since no middleware responded
 	app.use(function(req, res) {
-		res.status(404).render('theme/error/404', {
+		res.status(404).render('theme/error', {
 			url: req.originalUrl,
+            statusCode : 404,
 			error: 'Not Found'
 		});
 	});
