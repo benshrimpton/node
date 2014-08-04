@@ -48,16 +48,15 @@ module.exports = function(app){
     * **/
     app
         .route('/customer/address/new')
-        .get(Customer.hasAuthorization, Customer.customerAddressCreatePage);
+        .get(Customer.hasAuthorization, Customer.customerAddressCreatePage)
+        .post(Customer.hasAuthorization, Customer.createCustomerAddress);
 
     /*
-    * Create an address for a customer;
     * Retrieve the customer's addresses
     * **/
     app
         .route('/customer/address')
-        .get(Customer.hasAuthorization, Customer.customerAddressList)
-        .post(Customer.hasAuthorization, Customer.createCustomerAddress);
+        .get(Customer.hasAuthorization, Customer.customerAddressList);
 
 
     /*

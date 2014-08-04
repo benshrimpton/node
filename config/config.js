@@ -81,7 +81,7 @@ module.exports.getThemeCSSAssets = function(){
 module.exports.getNonAngularJavascriptAssets = function(){
     var output = this.getGlobbedFiles(this.assets.lib.basicJs, 'public/');
     return output;
-}
+};
 
 /**
  * Get the modules CSS files

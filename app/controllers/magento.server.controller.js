@@ -107,7 +107,40 @@ exports.syncCountryRegion = function(req, res){
                 });
         },
         function(countries, callback){
-            async.each(countries, function(country, callback){
+//            async.each(countries, function(country, callback){
+//                var obj = {
+//                    name : country.name,
+//                    iso2_code : country.iso2_code,
+//                    iso3_code : country.iso3_code,
+//                    country_id : country.country_id,
+//                };
+//                global
+//                    .magento
+//                    .directoryRegion
+//                    .list({
+//                        country : country.iso3_code
+//                    }, function(err, regions){
+//                        if (err) {
+//                            callback(err);
+//                        } else {
+//                            obj.regions = regions;
+//                            console.log(obj);
+//                            var country = new Country(obj);
+//                            country.save(function(err){
+//                                callback(err);
+//                            });
+//                        }
+//                    });
+//            }, function(err){
+//                if (err) {
+//                    callback(err);
+//                } else {
+//                    callback(null);
+//                }
+//            });
+
+
+            _.forEach(countries, function(country){
                 var obj = {
                     name : country.name,
                     iso2_code : country.iso2_code,
@@ -131,13 +164,9 @@ exports.syncCountryRegion = function(req, res){
                             });
                         }
                     });
-            }, function(err){
-                if (err) {
-                    callback(err);
-                } else {
-                    callback(null);
-                }
             });
+            return callback(null);
+
         }
     ], function(err, results){
         if (err) {
