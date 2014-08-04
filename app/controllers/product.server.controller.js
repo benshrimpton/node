@@ -10,9 +10,13 @@ var Promise = require('bluebird'),
     mongoose = require('mongoose'),
     Product = mongoose.model('Product'),
     Category = mongoose.model('Category'),
+    MagentoStore = mongoose.model('Store'),
     ProductAttribute = mongoose.model('ProductAttribute'),
-    async = require('async'),
+    Async = require('async'),
     _ = require('lodash');
+
+
+var internal = {};
 
 /**
  * Methods
@@ -80,17 +84,6 @@ var saveCategoryById = function(categoryId, cb){
  * @callback cb function(err, results|null)
  * */
 var synchCategory = function(cb){
-//    var arr = new Array();
-//    Product.find({}, function(err , products){
-//        if (err) return cb(err);
-//        //retrieve all categories in the database
-//        for(var i = 0; i < products.length; i++){
-//            for(var j = 0; j < products[i].categories.length; j++){
-//                saveCategoryById(products[i].categories[j])
-//            }
-//        }
-//        cb(null, products);
-//    });
 
     Category
         .find({})
@@ -384,6 +377,154 @@ var saveProductById = function(productId, cb){
 };
 
 
+internal.getProductDetail = function(storeView, callback){
+    Async.parallel({
+        productInfo : function(callback){
+            global
+                .magento
+                .catalogProduct
+                .info({
+                    id : storeView.product_id
+                }, function(err, productInfo){
+                    callback(err, productInfo);
+                });
+        },
+        media : function(callback){
+            global
+                .magento
+                .catalogProductAttributeMedia
+                .list({
+                    product : storeView.product_id
+                }, function(err, media){
+                    callback(err, media);
+                });
+        },
+        tierPrice : function(callback){
+            global
+                .magento
+                .catalogProductTierPrice
+                .info({
+                    product : storeView.product_id
+                }, function(err, tierPrice){
+                    callback(err, tierPrice);
+                });
+        },
+        productTags : function(callback){
+            global
+                .magento
+                .catalogProduct
+                .currentStore(function(err, view){
+                    if (err) {
+                        return callback(err);
+                    } else {
+                        global
+                            .magento
+                            .catalogProductTag
+                            .list({
+                                product : storeView.product_id,
+                                storeView : view
+                            }, function(err, tags){
+                                return callback(err, tags);
+                            })
+                    }
+                });
+        },
+        customOptions : function(callback){
+            global
+                .magento
+                .catalogProductCustomOption
+                .list({
+                    product : storeView.product_id
+                }, function(err, customOptions){
+                    callback(err, customOptions);
+                });
+        },
+        downloadable : function(callback){
+            if ( storeView.type === 'downloadable' ) {
+                global
+                    .magento
+                    .catalogProductDownloadableLink
+                    .list({
+                        product : storeView.product_id
+                    }, function(err, productDownloadableLink){
+                        callback(err, productDownloadableLink);
+                    });
+            } else {
+                callback(null);
+            }
+        }
+    }, function(err, results){
+        if (err) {
+            return callback(err);
+        } else {
+
+            var productInfo =  results.productInfo;
+            productInfo.product_set = productInfo.set;
+            productInfo.weight = (productInfo.weight) ? productInfo.weight : nul;
+            productInfo.product_media = results.media;
+            productInfo.product_tier_price = results.tierPrice;
+            productInfo.product_tags = results.productTags;
+            productInfo.product_customOptions = results.customOptions;
+
+            if (results.downloadable){
+                productInfo.links = results.downloadable.links;
+                productInfo.samples = results.downloadable.samples;
+            }
+
+            var product = new Product(productInfo);
+            product.save(function(err, savedProduct){
+                return callback(err, savedProduct);
+            });
+
+
+        }
+    });
+};
+
+/**
+ * will use the following method to sync all products in the future.
+ * */
+var syncProduct = function(callback){
+
+    Async.waterfall([
+        function(callback){
+            Product
+                .find({})
+                .remove()
+                .exec(function(err){
+                    callback(err);
+                });
+        },
+        function(callback){
+            global
+                .magento
+                .catalogProduct
+                .list(function(err, storeView){
+                    callback(err, storeView);
+                });
+        }
+    ], function(err, results){
+        if (err) {
+            return callback(err);
+        } else {
+            Async.each(results[0],
+                function(storeView, callback){
+                    internal.getProductDetail(storeView, function(err){
+                        if (err) {
+                            return callback(err);
+                        } else {
+                            return callback();
+                        }
+                    });
+                }, function(err){
+                    return callback(err);
+                });
+        }
+    });
+
+};
+
+
 
 
 /**
@@ -463,6 +604,216 @@ exports.getCategory = function(req, res){
         }
     });
 };
+
+/**
+* Product Type
+*
+* @return JSON productTypes[]
+*
+*
+* There are only four product types, which are :
+*
+* type : simple
+* label : Simple Product
+*
+* type : grouped
+* label : Grouped Product
+*
+* type : virtual
+* label : Virtual Product
+*
+* type : bundle
+* label : Bundle Product
+*
+* type : downloadable
+* label : Downloadable
+*
+* */
+exports.getProductTypes = function(req, res){
+
+    global
+        .magento
+        .catalogProductType
+        .list(function(err, productTypes){
+            if (err) {
+                return res.send(500, {
+                    message : err.message
+                });
+            } else {
+                return res.send(200, {
+                    productTypes : productTypes
+                });
+            }
+        });
+
+};
+
+
+/**
+ * Retrieve product attribute set.
+ *
+ * @return JSON productAttributeSet[]
+ *
+ * Properties:
+ * set_id, name
+ *
+ * */
+exports.getProductAttributeSet = function(req, res){
+
+    global
+        .magento
+        .catalogProductAttributeSet
+        .list(function(err, productAttributeSet){
+            if (err) {
+                return res.send(500, {
+                    err : err.message
+                });
+            } else {
+                return res.send(200, {
+                    productAttributeSet : productAttributeSet
+                });
+            }
+        });
+
+};
+
+/**
+ * Create a product (Simple, experimental, much more to add to it later on)
+ * */
+exports.createProduct = function(req, res){
+
+    global
+        .magento
+        .catalogProduct
+        .create({
+            type : req.body.productType,
+            set : req.body.productAttributeType,
+            sku : req.body.sku,
+            data : req.body
+        }, function(err, createdProductId){
+            if (err) {
+                return res.send(500, {
+                    message : err.message
+                });
+            } else {
+
+                /*
+                * Save directly into MongoDB. Should we ?
+                * **/
+                var obj =  req.body;
+                obj.type_id = obj.type;
+                obj.product_id = createdProductId;
+
+                var product = new Product(obj);
+                product.save(obj, function(err, createdProduct){
+                    if (err) {
+                        return res.send(500, {
+                            message : err.message
+                        });
+                    } else {
+                        return res.send(200, {
+                            product : createdProduct
+                        });
+                    }
+                });
+            }
+        });
+
+};
+
+/**
+ * Delete product
+ * */
+exports.removeProduct = function(req, res){
+
+    Product
+        .findOne({ sku : req.params.sku })
+        .exec(function(err, product){
+            if (err) {
+                return res.send(500, {
+                    message : err.message
+                })
+            } else {
+                global
+                    .magento
+                    .catalogProduct
+                    .delete({
+                        id : product.prduct_id
+                    }, function(err, isRemoved){
+                        if (err) {
+                            return res.send(500, {
+                                message : err.message
+                            })
+                        } else {
+                            product
+                                .remove(function(err){
+                                    if (err) {
+                                        return res.send(500, {
+                                            message : err.message
+                                        });
+                                    } else {
+                                        return res.send(200, {
+                                            isRemoved : isRemoved
+                                        });
+                                    }
+                                });
+                        }
+                    });
+            }
+        });
+
+};
+
+/**
+ * Update product
+ * */
+exports.updateProduct = function(req, res){
+
+    Product
+        .findOne({ sku : req.params.sku })
+        .exec(function(err, product){
+            if (err) {
+                return res.send(500, {
+                    message : err.message
+                });
+            } else {
+                global
+                    .magento
+                    .catalogProduct
+                    .update({
+                        id : product.product_id,
+                        data : req.body
+                    }, function(err, isUpdated){
+                        if (err) {
+                            return res.send(500, {
+                                message : err.message
+                            })
+                        } else {
+                            if (isUpdated) {
+                                product = _.extend(product, req.body);
+                                product.save(function(err){
+                                    if (err) {
+                                        return res.send(500, {
+                                            message : err.message
+                                        });
+                                    } else {
+                                        return res.send(200, {
+                                            isUpdated : isUpdated
+                                        })
+                                    }
+                                });
+                            } else {
+                                return res.send(200, {
+                                    isUpdated : isUpdated
+                                });
+                            }
+                        }
+                    });
+            }
+        });
+
+};
+
 
 /*
 * Get the product using its SKU

@@ -42,6 +42,19 @@ module.exports = function(app){
         .get(product.getProductBySKU);
 
 
+    /*
+    * Delete the product
+    * **/
+    app.route('/magento/product/delete/:productSKU')
+        .get(product.removeProduct);
+
+
+    /*
+    * Update the product
+    * **/
+    app.route('/magento/product/update/:productSKU')
+        .post(product.updateProduct);
+
     //Binding the product with middleware
     app.param('productSKU', product.productBySKU);
 

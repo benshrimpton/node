@@ -149,6 +149,7 @@ exports.createCustomerAddress = function(req, res){
             addressData : req.body
         }, function(err, customerAddressIds){
             if (err) {
+                console.log(err);
                 return res.send(500, {
                     message : err.message
                 });
