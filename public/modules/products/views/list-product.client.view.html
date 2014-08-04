@@ -11,9 +11,9 @@
         <div class="col-sm-4">
              <label>Quick filter</label><input type="search" class="form-control" ng-model="searchText">
         </div>
-        <div class="col-sm-4">
+ <!--       <div class="col-sm-4">
              <label>Do something</label><input type="search" class="form-control">
-        </div>
+        </div> -->
     </div> 
 </div>
 
@@ -25,7 +25,7 @@
         <tr>   
              <th>
              Select all
-              <input type="checkbox">
+              <input type="checkbox" ng-model="master">
               </th>
             <th>
                 <a href="#####">SKU <span class="glyphicon glyphicon-chevron-up"></span></a>
@@ -56,7 +56,7 @@
     <tbody>
             <tr data-ng-repeat="product in products | filter:searchText">
             <td class="id">
-                <input type="checkbox">
+                <input type="checkbox" ng-checked="master">
             </td>
 
               <td>
