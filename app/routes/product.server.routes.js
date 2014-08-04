@@ -7,9 +7,10 @@
 /**
  * Module Dependencies
  * */
-var product = require('../../app/controllers/product');
+
 
 module.exports = function(app){
+    var product = require('../../app/controllers/product');
 
     //to synchronize product and attributes
     app.route('/magento/sync/product')
@@ -27,6 +28,12 @@ module.exports = function(app){
     * */
     app.route('/magento/product')
         .get(product.getProducts);
+
+    /*
+    * Retrieve all categories.
+    * **/
+    app.route('/magento/category/all')
+        .get(product.getCategory);
 
     /*
     * Retrieve the detail of the product using SKU

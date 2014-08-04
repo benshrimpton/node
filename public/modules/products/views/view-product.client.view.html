@@ -1,16 +1,44 @@
-<table data-ng-controller="ProductsController" data-ng-init="findOne()" class="table table-striped">
-    <thead>
+<h2 class="page-header"><a data-ng-href="#!/products"><span class="glyphicon glyphicon-inbox"></span>&nbsp; Products</a></h2>
+
+
+
+<section data-ng-controller="ProductsController" data-ng-init="findOne()" class="table table-striped container-fluid">
+<!--     <thead>
         
     <th class="page-header">
-        <h1><a data-ng-href="#!/products">Products</a></h1>
+        <h1>Products</a></h1>
     </th>
-    </thead>
-    <tr class="list-group">
-    <td>
-        <a data-ng-href="#!/products/{{product.sku}}" class="list-group-item"><h2>{{product.name}}</h2></a>
-            <img src="{{ product.product_media[0].url }}" height="60" />
-            <p class="list-group-item-text" data-ng-bind="product.short_description"></p>
-            <p class="list-group-item-text">Price: ${{product.price}}</p>
-    </td>
-    </tr>
-</table>
+    </thead> -->
+    <div class="row">
+    <div class="col-sm-4">
+   
+        
+        <figure>
+            <img src="{{ product.product_media[0].url }}" height="300"  class="img-responsive"/>
+        </figure>
+
+       </div>
+
+
+
+       <div class="list-group col-sm-8"> 
+                <h2 class="page-header">{{product.name}} <small>SKU: {{product.sku}}</small></h2>
+                <b>Description</b><p  data-ng-bind="product.description"></p>
+                <p><b>Price:</b> ${{product.price}}</p>
+                <p><b>Sale Price:</b> ${{product.special_price}}</p>
+                <p><b>Sale Start Date:</b> {{product.special_from_date}} <b>Sale End Date:</b> {{product.special_to_date}}<p>
+                <p><b>SKU:</b> {{product.sku}}</p>
+                <p><b>iD:</b> {{product.id}}</p>
+                <p><b>Weight:</b> {{product.weight}}</p>
+                <p><b>Gift Message Enabled:</b> {{product.gift_message_available}}</p>
+
+                <hr>
+
+                <h4>Meta Data</h4>
+                <p><b>Meta Title:</b> {{product.meta_title}}</p>
+                <p><b>Meta Keywords:</b> {{product.meta_keyword}}</p>
+                <p><b>Meta Description:</b> {{product.meta_description}}</p>
+        </div>
+
+    </div>
+</section>

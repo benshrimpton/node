@@ -124,7 +124,7 @@ exports.articleByID = function(req, res, next, id) {
  */
 exports.hasAuthorization = function(req, res, next) {
 	if (req.article.user.id !== req.user.id) {
-		return res.send(403, {
+		res.send(403, {
 			message: 'User is not authorized'
 		});
 	}

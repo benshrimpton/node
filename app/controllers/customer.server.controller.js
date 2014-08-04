@@ -12,24 +12,10 @@ var Async = require('async'),
     Mongoose = require('mongoose'),
     Crypto = require('crypto'),
     Validator = require('validator'),
+    Country = Mongoose.model('Country'),
     CustomerGroup = Mongoose.model('CustomerGroup'),
     MagentoStore = Mongoose.model('Store');
 
-/*
-* Need to obtain the customer group from the Magento.
-* */
-var getCustomerGroupId = function(groupName){
-    switch (groupName) {
-        case 'NOT LOGGED IN':
-            return 0;
-        case 'General' :
-            return 1;
-        case 'Wholesale' :
-            return 2;
-        case 'Retailer' :
-            return 3;
-    }
-};
 
 /**
  * Authenticate the customer.
@@ -239,13 +225,33 @@ exports.customerAddressDetail = function(req, res){
                     message : err.message
                 });
             } else {
-                return res.render('customerAddress', {
+                return res.render('theme/customer/customerAddressForm', {
                     customerAddress : customerAddreses[0]
                 });
             }
         });
 
 };
+
+/**
+ * Render out the customer address page
+ * */
+exports.customerAddressCreatePage = function(req, res){
+    Country
+        .find({})
+        .exec(function(err, countries){
+            if (err) {
+                return res.send(500, {
+                    message : err.message
+                });
+            } else {
+                res.render('customerAddressForm', {
+                    customer : req.session.customer,
+                    countries : countries
+                });
+            }
+        });
+}
 
 /**
  * Update the customer detail.
@@ -437,14 +443,14 @@ exports.signout = function(req, res){
  * Render user a signup page
  * */
 exports.signUp = function(req, res){
-    res.render('theme/customerSignUp', { errorMsg : req.flash('error') });
+    res.render('theme/customer/customerSignUp', { errorMsg : req.flash('error') });
 };
 
 /**
  * Render user a sigin page
  * */
 exports.signin = function(req, res){
-    res.render('theme/customerSignIn', { errorMsg : req.flash('error') });
+    res.render('theme/customer/customerSignIn', { errorMsg : req.flash('error') });
 };
 
 /**
@@ -471,7 +477,7 @@ exports.profile = function(req, res){
                 delete customers.rp_token_created_at;
 
 
-                res.render('theme/customerProfile', {
+                res.render('theme/customer/customerProfile', {
                     customer : customers,
                     successMsg : req.flash('successMsg')
                 });
