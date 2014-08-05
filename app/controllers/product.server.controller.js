@@ -79,36 +79,6 @@ var saveCategoryById = function(categoryId, cb){
     });
 };
 
-/**
- * Save the existed category in the database, like product and posts
- * @callback cb function(err, results|null)
- * */
-var synchCategory = function(cb){
-
-    Category
-        .find({})
-        .remove()
-        .exec(function(err){
-            if (err) {
-                return cb(err);
-            } else {
-                Product
-                    .find({}, function(err, products){
-                        if (err) {
-                            return cb(err)
-                        } else {
-                            for(var i = 0; i < products.length; i++){
-                                for(var j = 0; j < products[i].categories.length; j++){
-                                    saveCategoryById(products[i].categories[j])
-                                }
-                            }
-                            cb(null, products);
-                        }
-                    });
-            }
-        });
-
-};
 
 /**
  * save the product attribute to mongoDB
@@ -190,7 +160,7 @@ var saveProductAttribute = function(setId, cb){
  * Synchronize the product attribute
  * @callback cb (error | null)
  * */
-var synchProductAttribute = function(cb){
+internal.syncProductAttribute = function(cb){
     /*
     * Clear the database, and reconstruct the database;
     * */
@@ -201,7 +171,10 @@ var synchProductAttribute = function(cb){
             if (err) {
                 return cb(err);
             }
-            global.magento.catalogProductAttributeSet.list(function(err, sets){
+            global
+                .magento
+                .catalogProductAttributeSet
+                .list(function(err, sets){
                 if (err) {
                     return cb(err);
                 }
@@ -233,158 +206,14 @@ var synchProductAttribute = function(cb){
  * Note : It needs to be flatten out for maintainable. It also needs to clear out the program
  *
  * */
-var saveProductById = function(productId, cb){
-
-    if (typeof productId === 'undefined')
-        throw(new Error('The product id is undefined'));
-
-    global.magento.catalogProduct.info({ id : productId }, function(err, productInfo){
-
-        if (err){
-            console.log(err);
-            //handle error
-        } else {
-            productInfo.product_set = productInfo.set;
-            productInfo.weight = (productInfo.weight) ? productInfo.weight : null;
-
-            global.magento.catalogProductAttributeMedia.list({ product : productInfo.product_id}, function(err, media){
-                if (err) {
-                    console.log(err);
-                    //handle the error
-                } else {
-
-                    productInfo.product_media = media;
-
-                    global.magento.catalogProductTierPrice.info({ product : productInfo.product_id }, function(err, tierPrice){
-                        if (err) {
-                            console.log(err)
-                            //handle the error
-                        } else {
-
-                            productInfo.product_tier_price = tierPrice;
-
-                            global.magento.catalogProduct.currentStore(function(err, storeView){
-                                if (err) {
-                                    console.log(err);
-                                    //handle the error
-                                } else {
-
-                                    global.magento.catalogProductTag.list({ productId : productInfo.product_id , storeView : storeView }, function(err, tags){
-
-                                        if (err) {
-                                            console.log(err);
-                                        } else {
-
-                                            console.log("___________________");
-                                            console.log(tags);
-                                            console.log("___________________");
-
-                                            productInfo.product_tags = tags;
-
-                                            global.magento.catalogProductCustomOption.list({ productId : productInfo.product_id }, function(err, customOption){
-                                                if (err) {
-                                                    console.log(err);
-                                                } else {
-
-                                                    productInfo.product_customOptions = customOption;
-
-                                                    if ( productInfo.type === 'downloadable' ) {
-                                                        global.magento.catalogProductDownloadableLink.list({ productId : productInfo.product_id }, function(err, productDownloadableLink){
-                                                            if (err) {
-                                                                console.log(err);
-                                                                //handle the error
-                                                            } else {
-                                                                productInfo.links = productDownloadableLink.links;
-                                                                productInfo.samples = productDownloadableLink.samples;
-                                                            }
-
-                                                            Product.findOne({ product_id : productInfo.product_id }, function(err, product){
-                                                                if (err) {
-                                                                    console.log(err);
-                                                                } else {
-                                                                    //there is something in the product
-                                                                    if (product) {
-                                                                        //update the product instead;
-                                                                        console.log("Found the product in database " + product.name);
-                                                                        Product.update({ product_id : productInfo.product_id }, productInfo, function(err, numAffectedRow){
-                                                                            if (err) {
-                                                                                console.log(err);
-                                                                                throw err;
-                                                                            }
-                                                                            console.log("The number of updated product was %d", numAffectedRow);
-                                                                            //cb(err, numAffectedRow);
-                                                                        });
-
-                                                                    } else {
-                                                                        //create the product instead;
-                                                                        var product = new Product(productInfo);
-
-                                                                        product.save(function(err, product, numAffectedRow){
-                                                                            if (err) {
-                                                                                console.log(err);
-                                                                            }
-                                                                            //cb(err);
-                                                                        });
-                                                                    }
-                                                                }
-                                                            });
-
-                                                        });
-                                                    } else {
-                                                        Product.findOne({ product_id : productInfo.product_id }, function(err, product){
-                                                            if (err) {
-                                                                console.log(err);
-                                                            } else {
-                                                                //there is something in the product
-                                                                if (product) {
-                                                                    //update the product instead;
-                                                                    Product.update({ product_id : productInfo.product_id }, productInfo, function(err, numAffectedRow){
-                                                                        if (err) {
-                                                                            console.log(err);
-                                                                            throw err;
-                                                                        }
-                                                                        //cb(err, numAffectedRow);
-                                                                    });
-
-                                                                } else {
-                                                                    //create the product instead;
-                                                                    var product = new Product(productInfo);
-
-                                                                    product.save(function(err, product, numAffectedRow){
-                                                                        if (err) {
-                                                                            console.log(err);
-                                                                        }
-                                                                        //cb(err);
-                                                                    });
-                                                                }
-                                                            }
-                                                        });
-                                                    }
-
-                                                }
-                                            });
-                                        }
-
-                                    });
-                                }
-                            });
-                        }
-                    });
-                }
-            });
-        }
-    });
-};
-
-
-internal.getProductDetail = function(storeView, callback){
+internal.saveProduct = function(product, callback){
     Async.parallel({
         productInfo : function(callback){
             global
                 .magento
                 .catalogProduct
                 .info({
-                    id : storeView.product_id
+                    id : product.product_id
                 }, function(err, productInfo){
                     callback(err, productInfo);
                 });
@@ -394,7 +223,7 @@ internal.getProductDetail = function(storeView, callback){
                 .magento
                 .catalogProductAttributeMedia
                 .list({
-                    product : storeView.product_id
+                    product : product.product_id
                 }, function(err, media){
                     callback(err, media);
                 });
@@ -404,7 +233,7 @@ internal.getProductDetail = function(storeView, callback){
                 .magento
                 .catalogProductTierPrice
                 .info({
-                    product : storeView.product_id
+                    product : product.product_id
                 }, function(err, tierPrice){
                     callback(err, tierPrice);
                 });
@@ -413,20 +242,19 @@ internal.getProductDetail = function(storeView, callback){
             global
                 .magento
                 .catalogProduct
-                .currentStore(function(err, view){
+                .currentStore(function(err, store){
                     if (err) {
                         return callback(err);
-                    } else {
-                        global
-                            .magento
-                            .catalogProductTag
-                            .list({
-                                product : storeView.product_id,
-                                storeView : view
-                            }, function(err, tags){
-                                return callback(err, tags);
-                            })
                     }
+                    global
+                        .magento
+                        .catalogProductTag
+                        .list({
+                            productId : product.product_id,
+                            storeView : store
+                        }, function(err, tags){
+                            callback(err, tags);
+                        });
                 });
         },
         customOptions : function(callback){
@@ -434,18 +262,18 @@ internal.getProductDetail = function(storeView, callback){
                 .magento
                 .catalogProductCustomOption
                 .list({
-                    product : storeView.product_id
+                    productId : product.product_id
                 }, function(err, customOptions){
                     callback(err, customOptions);
                 });
         },
         downloadable : function(callback){
-            if ( storeView.type === 'downloadable' ) {
+            if ( product.type === 'downloadable' ) {
                 global
                     .magento
                     .catalogProductDownloadableLink
                     .list({
-                        product : storeView.product_id
+                        productId : product.product_id
                     }, function(err, productDownloadableLink){
                         callback(err, productDownloadableLink);
                     });
@@ -455,12 +283,13 @@ internal.getProductDetail = function(storeView, callback){
         }
     }, function(err, results){
         if (err) {
+            console.log(err);
             return callback(err);
         } else {
 
             var productInfo =  results.productInfo;
             productInfo.product_set = productInfo.set;
-            productInfo.weight = (productInfo.weight) ? productInfo.weight : nul;
+            productInfo.weight = (productInfo.weight) ? productInfo.weight : null;
             productInfo.product_media = results.media;
             productInfo.product_tier_price = results.tierPrice;
             productInfo.product_tags = results.productTags;
@@ -484,7 +313,7 @@ internal.getProductDetail = function(storeView, callback){
 /**
  * will use the following method to sync all products in the future.
  * */
-var syncProduct = function(callback){
+internal.syncProduct = function(callback){
 
     Async.waterfall([
         function(callback){
@@ -507,9 +336,10 @@ var syncProduct = function(callback){
         if (err) {
             return callback(err);
         } else {
-            Async.each(results[0],
+            Async.eachLimit(results,
+                5,
                 function(storeView, callback){
-                    internal.getProductDetail(storeView, function(err){
+                    internal.saveProduct(storeView, function(err){
                         if (err) {
                             return callback(err);
                         } else {
@@ -525,51 +355,98 @@ var syncProduct = function(callback){
 };
 
 
-
-
 /**
- * Synchronize the product
- * @callback function cb(err, null|[objects])
+ * Sync all category
  * */
-var synchProduct = function(cb){
-    global.magento.catalogProduct.list(function(err, storeView){
-        if (err) {
-            return cb(err);
-        } else {
-            var currentIndex = 0;
-            for(var i = 0; i < storeView.length; i++){
-                currentIndex = i;
-                saveProductById(storeView[i].product_id);
+internal.syncAllCategory = function(callback){
+
+    Category
+        .find({})
+        .remove()
+        .exec(function(err){
+            if (err) {
+                return callback(err);
+            } else {
+                getTreeCategory();
+                callback(null);
             }
-            if (currentIndex === (storeView.length - 1))
-                cb(null, storeView);
-        }
-    });
+        });
+
 };
 
 
+/**
+ * Save the existed category in the database, like product and posts
+ * @callback cb function(err, results|null)
+ * */
+internal.synchCategory = function(cb){
+
+    Category
+        .find({})
+        .remove()
+        .exec(function(err){
+            if (err) {
+                return cb(err);
+            } else {
+                Product
+                    .find({}, function(err, products){
+                        if (err) {
+                            return cb(err)
+                        } else {
+                            for(var i = 0; i < products.length; i++){
+                                for(var j = 0; j < products[i].categories.length; j++){
+                                    saveCategoryById(products[i].categories[j])
+                                }
+                            }
+                            cb(null, products);
+                        }
+                    });
+            }
+        });
+};
+
+/**
+ * Synchronize all producs , category, and productAttribute
+ * */
 exports.synchProduct = function(req, res){
-    synchProduct(function(err, results){
+
+    Async.series({
+        syncProduct : function(callback){
+            internal.syncProduct(function(err, results){
+                callback(err, results);
+            });
+        },
+        syncCategory : function(callback){
+            internal.syncAllCategory(function(err){
+                callback(err);
+            });
+        },
+        syncProductAttribute : function(callback){
+            internal.syncProductAttribute(function(err){
+                callback(err);
+            });
+        }
+    }, function(err, results){
         if (err) {
+            console.log(err);
             return res.send(500, {
                 message : err.message
             });
         }
-        getTreeCategory();
-        synchProductAttribute(function(err){
-            if (err) {
-                return res.send(500, {
-                    message : err.message
-                });
-            } else {
-                res.jsonp(results[0]);
-            }
+        return res.send(200, {
+            message : 'Synchronization successful'
         });
     });
+
 };
 
+
+/**
+ * Synchronize category
+ * */
 exports.synchCategory = function(req, res){
-    synchCategory(function(err, results){
+
+    internal.syncCategory(function(err){
         if (err) {
             return res.send(500, {
                 message : err.message
@@ -580,6 +457,12 @@ exports.synchCategory = function(req, res){
 };
 
 
+/**
+ * retrieve all products
+ *
+ * @return JSON
+ *
+ * */
 exports.getProducts = function(req, res){
     Product.find({}, function(err, products){
         if (err) {
@@ -598,13 +481,17 @@ exports.getProducts = function(req, res){
                     res.jsonp(products);
                 }
             });
-//
-//            res.jsonp(products);
+
         }
     });
 };
 
-
+/**
+ * Retrieve category
+ *
+ * @return JSON
+ *
+ * */
 exports.getCategory = function(req, res){
     Category.find({}, function(err, categories){
         if (err) {
@@ -822,7 +709,7 @@ exports.updateProduct = function(req, res){
 };
 
 
-/*
+/**
 * Get the product using its SKU
 *
 * @return JSON product
@@ -840,8 +727,16 @@ exports.getProductBySKU = function(req, res){
     });
 };
 
+
+
+
 /**
  * Magento Express Middleware
+ * */
+
+
+/**
+ * Obtain product and assign it to req.product.
  * */
 exports.productBySKU = function(req, res, next, sku){
 
