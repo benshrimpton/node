@@ -1,0 +1,25 @@
+{% extends '../layout2.server.view.html' %}
+
+
+{% block content %}
+
+
+<div class="row">
+
+    <div class="col-md-8">
+        <a href="#" class="thumbnail">
+            <img {% if !product.product_media.length %}data-src="holder.js/300x300"{% endif %} src="{% if product.product_media.length %}{{product.product_media[0].url}}{% endif %}" width="300" height="300" alert="...">
+        </a>
+        <h4>
+            <a href="/magento/product/{{product.sku}}">{{ product.name }}</a>
+        </h4>
+        <p>{{ product.short_description }}</p>
+    </div>
+    <div class="col-md-4">
+        <h2>{{ product.name }}</h2>
+        <h3>Price : {{product.price}}</h3>
+    </div>
+
+</div>
+
+{% endblock %}

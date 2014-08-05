@@ -29,7 +29,8 @@ module.exports = {
             ],
             basicJs : [
                 'public/lib/jquery/dist/jquery.js',
-                'public/lib/bootstrap/dist/js/bootstrap.js'
+                'public/lib/bootstrap/dist/js/bootstrap.js',
+                'public/lib/holderjs/holder.js'
             ]
 		},
 		css: [

@@ -1,0 +1,21 @@
+{% extends '../layout2.server.view.html' %}
+
+
+{% block content %}
+
+
+<div class="row">
+    {% for product in products %}
+    <div class="col-md-4">
+        <a href="#" class="thumbnail">
+            <img {% if !product.product_media.length %}data-src="holder.js/300x300"{% endif %} src="{% if product.product_media.length %}{{product.product_media[0].url}}{% endif %}" width="300" height="300" alert="...">
+        </a>
+        <h4>
+            <a href="/magento/product/{{product.sku}}">{{ product.name }}</a>
+        </h4>
+        <p style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width:12em; " >{{ product.short_description }}</p>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}

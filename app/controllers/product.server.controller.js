@@ -587,7 +587,19 @@ exports.getProducts = function(req, res){
                 message : err.message
             });
         } else {
-            res.jsonp(products);
+
+            res.format({
+                html : function(){
+                    res.render('theme/product/products', {
+                        products : products
+                    });
+                },
+                json : function(){
+                    res.jsonp(products);
+                }
+            });
+//
+//            res.jsonp(products);
         }
     });
 };
@@ -819,7 +831,16 @@ exports.updateProduct = function(req, res){
 * */
 exports.getProductBySKU = function(req, res){
     console.log(req.product);
-    res.jsonp(req.product);
+    res.format({
+        html : function(){
+            res.render('theme/product/product', {
+                product : req.product
+            });
+        },
+        json : function(){
+            res.jsonp(req.product);
+        }
+    });
 };
 
 /**
