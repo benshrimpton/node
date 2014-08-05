@@ -36,24 +36,28 @@ module.exports = function(app){
         .get(product.getCategory);
 
     /*
+     * Create Product
+     * **/
+    app.route('/magento/product/new')
+        .post(product.createProduct);
+
+    /*
+     * Delete the product
+     * **/
+    app.route('/magento/product/delete/:productSKU')
+        .get(product.removeProduct);
+
+    /*
+     * Update the product
+     * **/
+    app.route('/magento/product/update/:productSKU')
+        .post(product.updateProduct);
+
+    /*
     * Retrieve the detail of the product using SKU
     * */
     app.route('/magento/product/:productSKU')
         .get(product.getProductBySKU);
-
-
-    /*
-    * Delete the product
-    * **/
-    app.route('/magento/product/delete/:productSKU')
-        .get(product.removeProduct);
-
-
-    /*
-    * Update the product
-    * **/
-    app.route('/magento/product/update/:productSKU')
-        .post(product.updateProduct);
 
     //Binding the product with middleware
     app.param('productSKU', product.productBySKU);

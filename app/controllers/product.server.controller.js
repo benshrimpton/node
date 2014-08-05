@@ -682,6 +682,8 @@ exports.getProductAttributeSet = function(req, res){
  * */
 exports.createProduct = function(req, res){
 
+    console.log(req.body);
+
     global
         .magento
         .catalogProduct
@@ -692,6 +694,7 @@ exports.createProduct = function(req, res){
             data : req.body
         }, function(err, createdProductId){
             if (err) {
+                console.log(err);
                 return res.send(500, {
                     message : err.message
                 });
@@ -707,6 +710,7 @@ exports.createProduct = function(req, res){
                 var product = new Product(obj);
                 product.save(obj, function(err, createdProduct){
                     if (err) {
+                        console.log(err);
                         return res.send(500, {
                             message : err.message
                         });
@@ -725,43 +729,36 @@ exports.createProduct = function(req, res){
  * Delete product
  * */
 exports.removeProduct = function(req, res){
-
-    Product
-        .findOne({ sku : req.params.sku })
-        .exec(function(err, product){
+    if (!req.product) {
+        return res.send(404, {
+            message : 'Not product was found'
+        });
+    }
+    global
+        .magento
+        .catalogProduct
+        .delete({
+            id : req.product.product_id
+        }, function(err, isRemoved){
             if (err) {
                 return res.send(500, {
                     message : err.message
                 })
             } else {
-                global
-                    .magento
-                    .catalogProduct
-                    .delete({
-                        id : product.prduct_id
-                    }, function(err, isRemoved){
+                req.product
+                    .remove(function(err){
                         if (err) {
                             return res.send(500, {
                                 message : err.message
-                            })
+                            });
                         } else {
-                            product
-                                .remove(function(err){
-                                    if (err) {
-                                        return res.send(500, {
-                                            message : err.message
-                                        });
-                                    } else {
-                                        return res.send(200, {
-                                            isRemoved : isRemoved
-                                        });
-                                    }
-                                });
+                            return res.send(200, {
+                                isRemoved : isRemoved
+                            });
                         }
                     });
             }
         });
-
 };
 
 /**
