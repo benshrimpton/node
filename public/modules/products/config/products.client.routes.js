@@ -16,5 +16,9 @@ angular.module('products').config(['$stateProvider',
                 url: '/products/:productSKU',
                 templateUrl: 'modules/products/views/view-product.client.view.html'
             });
+     /*       state('createProduct', {
+                url: '/products/create',
+                templateUrl: 'modules/products/views/create-product.client.view.html'
+            });  */
     }
 ]);

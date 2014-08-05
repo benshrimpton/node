@@ -1,4 +1,4 @@
-<h2 class="page-header"><a data-ng-href="#!/products"><span class="glyphicon glyphicon-inbox"></span>&nbsp; Products</a></h2>
+    <h2 class="page-header"><a data-ng-href="#!/products"><span class="glyphicon glyphicon-inbox"></span>&nbsp; Products</a></h2>
 
 
 
@@ -11,17 +11,15 @@
     </thead> -->
     <div class="row">
     <div class="col-sm-4">
-   
-        
+
+
         <figure>
             <img src="{{ product.product_media[0].url }}" height="300"  class="img-responsive"/>
         </figure>
 
        </div>
 
-
-
-       <div class="list-group col-sm-8"> 
+       <div class="list-group col-sm-8">
                 <h2 class="page-header">{{product.name}} <small>SKU: {{product.sku}}</small></h2>
                 <b>Description</b><p  data-ng-bind="product.description"></p>
                 <p><b>Price:</b> ${{product.price}}</p>

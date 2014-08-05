@@ -22,28 +22,28 @@
     
     <table class="sylius-products-table table table-striped table-bordered">
     <thead>
-        <tr>   
+        <tr>
              <th>
              Select all
               <input type="checkbox" ng-model="master">
               </th>
             <th>
-                <a href="#####" ng-click="reverse=!reverse;order('sku',reverse)">SKU <span class="glyphicon glyphicon-chevron-up"></span></a>
+                <a href="#####" ng-click="predicate = 'name'; reverse=!reverse">SKU <!-- <span class="glyphicon glyphicon-chevron-up"></span> --></a>
             </th>
             <th>
-                <a href="###">Image</a>
+                Image
             </th>
             <th>
-                <a href="#">Name</a>
+                <a href="#" ng-click="predicate = 'name'; reverse=!reverse">Name</a>
             </th>
             <th>
                 Current stock
             </th>
             <th>
-                Retail price
+                <a href="#" ng-click="predicate = 'name'; reverse=!reverse">Retail price</a>
             </th>
             <th>
-                <a href="#">Updated On</a>
+                <a href="#" ng-click="predicate = 'name'; reverse=!reverse">Updated On</a>
             </th>
             <th>
                 Modify Product
@@ -54,7 +54,7 @@
     </thead>
     
     <tbody>
-            <tr data-ng-repeat="product in products | filter:searchText">
+            <tr data-ng-repeat="product in products | filter:searchText | orderBy:predicate:reverse">
             <td class="id">
                 <input type="checkbox" ng-checked="master">
             </td>
