@@ -426,6 +426,7 @@ exports.customerSignin = function(req, res){
                     } else {
                         if ( authenticate(req.body.password, customers[0].password_hash ) === true ) {
                             delete customers[0].password_hash;
+                            req.customer = customers[0];
                             req.session.customer = customers[0];
 //                            return res.send(200,{
 //                                message  : 'Login Successfully'
@@ -536,9 +537,11 @@ exports.profile = function(req, res){
 };
 
 /**
- * Customer middleware
- *
- * It needs to be called later in the development
+ * Custom Customer Middlewares
+ * */
+
+/**
+ * Check whether the use is authorized to access this page
  * */
 exports.hasAuthorization = function(req, res, next){
     if ( ! req.session.customer ) {
@@ -546,6 +549,15 @@ exports.hasAuthorization = function(req, res, next){
             message : 'User is forbidden'
         });
     }
+    next();
+};
+
+
+/**
+ * Expose customer thoroughout the template
+ * */
+exports.customer = function(req, res, next){
+    res.locals.customer = (typeof req.session.customer === 'undefined') ? null : req.session.customer;
     next();
 };
 

@@ -10,7 +10,8 @@
 
 
 module.exports = function(app){
-    var product = require('../../app/controllers/product');
+    var product = require('../../app/controllers/product'),
+        customer = require('../../app/controllers/customer');
 
     //to synchronize product and attributes
     app.route('/magento/sync/product')
@@ -27,7 +28,7 @@ module.exports = function(app){
     * retrieve all products
     * */
     app.route('/magento/product')
-        .get(product.getProducts);
+        .get(customer.customer, product.getProducts);
 
     /*
     * Retrieve all categories.
@@ -57,7 +58,7 @@ module.exports = function(app){
     * Retrieve the detail of the product using SKU
     * */
     app.route('/magento/product/:productSKU')
-        .get(product.getProductBySKU);
+        .get(customer.customer, product.getProductBySKU);
 
     //Binding the product with middleware
     app.param('productSKU', product.productBySKU);

@@ -694,8 +694,6 @@ exports.getProductAttributeSet = function(req, res){
  * */
 exports.createProduct = function(req, res){
 
-    console.log(req.body);
-
     global
         .magento
         .catalogProduct
@@ -830,7 +828,6 @@ exports.updateProduct = function(req, res){
 * @return JSON product
 * */
 exports.getProductBySKU = function(req, res){
-    console.log(req.product);
     res.format({
         html : function(){
             res.render('theme/product/product', {

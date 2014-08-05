@@ -122,7 +122,6 @@ module.exports = function(db) {
 		require(path.resolve(routePath))(app);
 	});
 
-
     // The server understood the request, but is refusing to fulfill it. Authorization will not help and the request SHOULD NOT be repeated.
     app.use(function(req, res){
         res.status(403).render('theme/error', {
@@ -155,14 +154,14 @@ module.exports = function(db) {
         });
     });
 
-	// Assume 404 since no middleware responded
-	app.use(function(req, res) {
-		res.status(404).render('theme/error', {
-			url: req.originalUrl,
+    // Assume 404 since no middleware responded
+    app.use(function(req, res) {
+        res.status(404).render('theme/error', {
+            url: req.originalUrl,
             statusCode : 404,
-			error: 'Not Found'
-		});
-	});
+            error: 'Not Found'
+        });
+    });
 
 	return app;
 };
