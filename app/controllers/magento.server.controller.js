@@ -15,9 +15,6 @@ var Promise = require('bluebird'),
     _ = require('lodash');
 
 
-
-
-
 /**
  * Sync Magento Store and core information
  * */
