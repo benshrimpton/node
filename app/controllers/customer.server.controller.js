@@ -344,12 +344,24 @@ exports.customerList = function(req, res){
             filters : (req.params.filter) | null
         }, function(err, customers){
             if (err) {
-                return res.send(200, {
+                return res.send(500, {
                     message : err.message
                 });
             } else {
-                return res.send(200, {
-                    customers : customers
+                res.format({
+                    text : function(){
+                        return res.send(200, {
+                            customers: customers
+                        });
+                    },
+                    html : function(){
+                        return res.send(200, {
+                            customers: customers
+                        });
+                    },
+                    json : function(){
+                        return res.jsonp(customers);
+                    }
                 });
             }
         });

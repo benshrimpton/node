@@ -36,6 +36,15 @@ module.exports = function(app){
         .get(Customer.signin)
         .post(Customer.customerSignin);
 
+
+    /*
+    * Retrieve customer list
+    * **/
+    app
+        .route('/customer/all')
+        .get(Customer.customerList);
+
+
     /*
     * Customer Profile Page
     * **/
