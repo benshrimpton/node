@@ -13,6 +13,9 @@ module.exports = function(app){
    var salesOrder = require('../../app/controllers/order');
 
 
+    /**
+     * Sales orders
+     * */
     app.route('/salesorder/all')
       .get(salesOrder.getAllOrders);
 
@@ -27,5 +30,6 @@ module.exports = function(app){
 
     app.route('/salesorder/:id')
        .get(salesOrder.getOrderDetail);
+
 
 };
