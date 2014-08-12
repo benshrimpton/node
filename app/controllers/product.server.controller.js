@@ -215,6 +215,7 @@ internal.saveProduct = function(product, callback){
                 .info({
                     id : product.product_id
                 }, function(err, productInfo){
+                    console.log(productInfo.tier_price);
                     callback(err, productInfo);
                 });
         },
@@ -406,7 +407,56 @@ internal.synchCategory = function(cb){
 };
 
 /**
- * Synchronize all producs , category, and productAttribute
+ * Retrieve the inventory of a product or specified product.
+ *
+ * @params String|String[] obj List of product ID(s) or SKU(s)
+ * @return function cb
+ * */
+internal.getInventory = function(obj, cb){
+    global
+        .magento
+        .catalogInventoryStockItem
+        .list({
+            products : obj
+        }, function(err, inventoryStockItemEntity){
+            cb(err, inventoryStockItemEntity);
+        });
+};
+
+/**
+ * Update the inventory of a specified product
+ *
+ * using Promise in the following method
+ * */
+internal.updateInventory = function(productSKU, obj){
+    return new Promise(function(resolve, reject){
+        global
+            .magento
+            .catalogInventoryStockItem
+            .update({
+                product : productSKU,
+                data : obj
+            }, function(err, result){
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(result);
+                }
+            });
+    });
+};
+
+
+
+
+
+/**
+ * Controllers
+ *
+ * */
+
+/**
+ * Synchronize all products , category, and productAttribute
  * */
 exports.synchProduct = function(req, res){
 
@@ -747,8 +797,17 @@ exports.productBySKU = function(req, res, next, sku){
         if (!product) {
             return next(new Error('The product (' + sku + ') is not our product.'));
         }
-        req.product = product;
-        next();
+
+        internal.getInventory(sku, function(err, result){
+            if (err) {
+                return next(err);
+            } else {
+                req.product = product;
+                req.product.qty = Math.ceil(result[0].qty);
+                req.product.is_in_stock = result[0].is_in_stock;
+                next();
+            }
+        });
     });
 
 };

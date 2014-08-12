@@ -13,7 +13,7 @@ module.exports = function(app){
 
     app
         .route('/cart/products')
-        .get(Cart.getCart);
+        .get(Cart.getAllCart);
 
 
     app

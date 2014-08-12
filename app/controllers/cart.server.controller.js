@@ -246,9 +246,9 @@ exports.addToCart = function(req, res){
 
     console.log(req.body);
 
-    product.product_id = req.body.product_id;
-    product.sku = req.body.sku;
-    product.qty = req.body.qty;
+    product.product_id = (req.body.product_id) ? req.body.product_id : null;
+    product.sku = (req.body.sku) ? req.body.sku : null;
+    product.qty = (req.body.qty || req.body.qty > 0) ? req.body.qty : 1;
 
     /*
      * Following variables were not added into the cart since
@@ -304,7 +304,7 @@ exports.addToCart = function(req, res){
  * retrieve a list of products in the shopping cart (quote) in the form of array.
  * @return JSON
  * */
-exports.getCart = function(req, res){
+exports.getAllCart = function(req, res){
     if ( !req.session.cart ) {
         return res.send(400, {
             message : 'You cart is empty'

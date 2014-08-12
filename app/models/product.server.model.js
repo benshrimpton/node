@@ -108,7 +108,10 @@ var ProductSchema = new Schema({
         type : String
     },
 
-    //Product visibility on the frontend
+    /*
+    * Product visibility on the frontend
+    * 1 = Not visible, 2 = Catalog, 3 = Search, 4 = Catalog/Search
+    * */
     visibility : {
         type : String
     },
@@ -183,6 +186,36 @@ var ProductSchema = new Schema({
     custom_design : {
         type : String
     },
+
+    /*
+    * Unknown data
+    *
+    * From Bubble API
+    * **/
+    stock_data : [{
+        use_config_manage_stock : {
+            type : String
+        },
+        manage_stock : {
+            type : String
+        }
+    }],
+
+    /*
+    * Simple products to associate
+    *
+    * From Bubble API
+    * **/
+    associated_skus : [{
+        type : String
+    }],
+
+    /*
+    * Unknown data
+    *
+    * From Bubble API
+    * **/
+    price_changes : [],
 
     //custom layout update
     custom_layout_update : {

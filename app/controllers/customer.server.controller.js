@@ -279,9 +279,6 @@ exports.customerAddressCreatePage = function(req, res){
  * */
 exports.updateCustomerAddress = function(req, res){
 
-    console.log(req.body);
-    console.log(req.params.addressId);
-
     global
         .magento
         .customerAddress
