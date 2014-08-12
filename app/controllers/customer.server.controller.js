@@ -471,7 +471,7 @@ exports.customerSignin = function(req, res){
  * Logout the customer.
  * */
 exports.signout = function(req, res){
-    delete req.session.customer;
+    delete req.session.destroy();
     return res.redirect('/');
 };
 

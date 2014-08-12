@@ -18,7 +18,7 @@ internal.getShipmentsList = function(filters){
         global
             .magento
             .salesOrderShipment
-            .list(filters, function(err, shipments){
+            .list(function(err, shipments){
                 if (err) {
                     reject(err);
                 } else {
@@ -50,16 +50,16 @@ internal.getShipmentInfo = function(shipmentIncrementId){
 };
 
 /**
- * Get all of the carriers for a specific shipment 
+ * Get all of the carriers for a specific shipment
  *
  * */
-internal.getCarriers = function(shipmentIncrementId){
+internal.getCarriers = function(orderIncrementId){
     return new Promise(function(resolve, reject){
         global
             .magento
             .salesOrderShipment
             .getCarriers({
-                shipIncrementId : shipmentIncrementId
+                orderIncrementId : orderIncrementId
             }, function(err, carries){
                 if (err) {
                     reject(err);
@@ -71,8 +71,131 @@ internal.getCarriers = function(shipmentIncrementId){
 };
 
 
+/**
+ * Add a new tracking number to the order shipment
+ *
+ * obj = {
+ *
+ *  shipmentIncrementId : (String) Shipment increment ID
+ *  carrier : (String) Carrier Code (ups, usps, dhl, fedex, dhlint)
+ *  title : (String) tracking title,
+ *  trackNumber : (String) tracking number
+ *
+ * }
+ * */
+internal.addTrack = function(obj){
+    return new Promise(function(resolve, reject){
+        global
+            .magento
+            .salesOrderShipment
+            .addTrack(obj, function(err, trackingId){
+                if(err){
+                    reject(err);
+                } else {
+                    resolve(trackingId);
+                }
+            });
+    });
+};
 
 
+/**
+ * Add a new comment to the order shipment
+ *
+ * obj = {
+ *
+ *  shipmentIncrementId : shipment increment Id,
+ *  comment : (String) shipment comment (optional),
+ *  email : (String) send email flag (optional),
+ *  includeEmail : (String) include comment in email flag (optional)
+ *
+ * }
+ * */
+internal.addComment = function(obj){
+    return new Promise(function(resolve, reject){
+        global
+            .magento
+            .salesOrderShipment
+            .addComment(obj, function(err, isAdded){
+                if(err){
+                    reject(err);
+                } else {
+                    resolve(isAdded);
+                }
+            });
+    });
+};
+
+
+/**
+ * Controllers
+ * */
+
+/**
+ * Retrieve All available Shipments available
+ *
+ * */
+exports.getAllShipment = function(req, res){
+
+    internal.getShipmentsList(null)
+        .then(function(shipments){
+            return res.jsonp(shipments);
+        })
+        .catch(function(err){
+            return res.send(500, {
+                message : err.message
+            });
+        });
+
+};
+
+/**
+ * Retrieve the detail of specified shipment
+ *
+ * */
+exports.getShipmentInfo = function(req, res){
+
+    if (req.params.shipmentId){
+        internal.getShipmentInfo(req.params.shipmentId)
+            .then(function(shipment){
+                return res.jsonp(shipment);
+            })
+            .catch(function(err){
+                return res.send(500, {
+                    message : err.message
+                });
+            });
+    }else{
+        return res.send(400, {
+            message : 'Something is missing.'
+        });
+    }
+
+};
+
+/**
+ * Retrieve all of available carries
+ *
+ * */
+exports.getCarries = function(req, res){
+
+    if (req.params.orderId){
+        internal.getCarriers(req.params.orderId)
+            .then(function(carries){
+                return res.jsonp(carries);
+            })
+            .catch(function(err){
+                return res.send(500, {
+                    message : err.message
+                });
+            });
+    }else{
+        return res.send(400, {
+            message : 'Something is missing'
+        });
+    }
+
+};
 
 
 
