@@ -74,7 +74,6 @@ internal.getCreditMemoInfo = function(creditmemoIncrementId){
  *  notifyCustomer : (int) notify customer by email flag (optional),
  *  includeComment : (int) include comment text into an email notification (optional)
  *  refundToStoreCreditAmount : (String) payment amount to be refunded to the customer store credit (optional)
- *
  * }
  *
  * */
@@ -139,4 +138,46 @@ internal.addComment = function(obj){
                 }
              });
     });
+};
+
+
+
+/**
+ * Controllers
+ * */
+
+/**
+ * Retrieve all available credit memos
+ * */
+exports.getAllCreditMemo = function(req,res){
+    internal.getCreditMemoList(null)
+        .then(function(creditMemos){
+            return res.jsonp(creditMemos);
+        })
+        .catch(function(err){
+            return res.send(500, {
+                message : err.message
+            });
+        });
+};
+
+/**
+ * Retrieve the detail of the specified credit memo
+ * */
+exports.getCreditMemoDetail = function(req, res){
+    if (req.params.creditMemoId) {
+        internal.getCreditMemoInfo(req.params.creditMemoId)
+            .then(function(creditMemo){
+                return res.jsonp(creditMemo)
+            })
+            .catch(function(err){
+                return res.send(500, {
+                    message : err.message
+                });
+            });
+    } else {
+        return res.send(400, {
+            message : 'Ops, something is missing'
+        });
+    }
 };
