@@ -5,6 +5,10 @@ Splintr is a middleware for Magento built with a MEAN stack, which provides a st
 ##Important 
 For more information, please visit meanjs.org. 
 
+In Magento API, we need to add addresses to cart in order to get product price. 
+However, it is a hack. 
+
+
 Run 
 ```
 $ sudo npm install 

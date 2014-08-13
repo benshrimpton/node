@@ -15,13 +15,33 @@ var Promise = require('bluebird'),
     mongoose = require('mongoose'),
     Product = mongoose.model('Product'),
     Category = mongoose.model('Category'),
+    Store = mongoose.model('Store'),
     ProductAttribute = mongoose.model('ProductAttribute'),
-    async = require('async'),
+    Async = require('async'),
     _ = require('lodash'),
     CreditCard = require('credit-card');
 
 
 var internal = {};
+
+
+/**
+ * Retrieve active store object
+ * */
+internal.getCurrentStoreId = function(cb){
+    Store
+        .findOne()
+        .exec(function(err, currentStore){
+        if (err) {
+            return cb(err);
+        } else {
+            var activeStore = _.find(currentStore.store, function(store){
+                return store.is_active === 1;
+            });
+            return cb(null, activeStore);
+        }
+    });
+};
 
 /**
  * Add coupon to the cart
@@ -80,20 +100,14 @@ internal.removeCouponFromCart = function(args, callback){
 
 /**
  * Retrieve a list of available payments methods for a shopping cart
- *
- * args must be an object such as following
- *
- * args = {
- *  cartId : Your cart id
- * }
  * */
-internal.getPaymentMethods = function(args, callback){
+internal.getPaymentMethods = function(cartId, callback){
 
     global
         .magento
         .checkoutCartPayment
         .list({
-            quoteId : args.cartId
+            quoteId : cartId
         }, function(err, shoppingCartPaymentMethods){
             callback(err, shoppingCartPaymentMethods);
         });
@@ -220,6 +234,141 @@ internal.addItemToCart = function(args, callback){
 
 };
 
+
+/**
+ * Retrieve the total prices for a shopping cart.
+ *
+ * @params String cartId
+ * */
+internal.getCartTotal = function(cartId){
+
+//    internal.getCurrentStoreId()
+//        .then(function(store){
+//            return new Promise(function(resolve, reject){
+//                global
+//                    .magento
+//                    .checkoutCart
+//                    .totals({
+//                        quoteId : cartId,
+//                        storeView : store.store_id
+//                    }, function(err, totals){
+//                        if (err) {
+//                            reject(err);
+//                        } else {
+//                            resolve(totals);
+//                        }
+//                    });
+//            });
+//        }).catch(function(err){
+//            reject(err);
+//        });
+
+    return new Promise(function(resolve, reject){
+        internal.getCurrentStoreId(function(err, activeStore){
+            if (err) {
+                reject(err);
+            } else {
+                global
+                    .magento
+                    .checkoutCart
+                    .totals({
+                        quoteId : cartId,
+                        storeView : activeStore.store_id
+                    }, function(err, totals){
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(totals);
+                        }
+                    });
+            }
+        });
+    });
+
+};
+
+/**
+ * Retrieve full information about the shopping cart.
+ *
+ * @params String cartId
+ *
+ * @return []
+ * */
+internal.getTotalInfo = function(cartId){
+    return new Promise(function(resolve, reject){
+        console.log(cartId + ' %%^%&%^&^%&^%^767%^&%^&%^&');
+        global
+            .magento
+            .checkoutCart
+            .info({
+                quoteId : cartId
+            }, function(err, cartInfo){
+                if (err) {
+                    console.log(err);
+                    reject(err);
+                } else {
+                    console.log(cartInfo);
+                    resolve(cartInfo);
+                }
+            });
+    });
+};
+
+/**
+ * Retrieve the website license agreement for the quote according to the store
+ *
+ * @param String cartId (required)
+ * @param String storeView (optional)
+ * @param String agreements (optional)
+ *
+ * @return []
+ *
+ * */
+internal.getLicense = function(cartId, storeView, agreements){
+    return new Promise(function(resolve, reject){
+        global
+            .magento
+            .checkoutCart
+            .order({
+                quoteId : cartId,
+                storeView : (storeView) ? storeView : null,  //enforce null
+                agreements : (agreements) ? agreements : null
+            }, function(err, license){
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(license);
+                }
+            });
+    });
+};
+
+
+/**
+ * Retrieve the list of products in the shopping cart
+ *
+ * @param String cartId (required)
+ *
+ * @return []
+ * */
+internal.getProductInCart = function(cartId){
+    return new Promise(function(resolve, reject){
+        global
+            .magento
+            .checkoutCartProduct
+            .list({
+                quoteId : cartId
+            }, function(err, products){
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(products);
+                }
+            });
+    });
+};
+
+
 /**
  * add a single product to the cart
  *
@@ -230,25 +379,12 @@ internal.addItemToCart = function(args, callback){
  * */
 exports.addToCart = function(req, res){
 
-//    if (!req.session.cart){
-//        global.magento.checkoutCart.create(function(err,quoteId){
-//            if (err) {
-//                return res.send(500, {
-//                    message : err.message
-//                });
-//            }
-//            req.session.cart = {};
-//            req.session.cart.id = quoteId;
-//        });
-//    }
-
     var product = {};
 
     console.log(req.body);
 
-    product.product_id = (req.body.product_id) ? req.body.product_id : null;
     product.sku = (req.body.sku) ? req.body.sku : null;
-    product.qty = (req.body.qty || req.body.qty > 0) ? req.body.qty : 1;
+    product.qty = (req.body.qty || req.body.qty > 0) ? parseFloat(req.body.qty) : 1.00;
 
     /*
      * Following variables were not added into the cart since
@@ -263,64 +399,85 @@ exports.addToCart = function(req, res){
     /*
      * Add item into cart
      * */
-    global
+
+    console.log(product);
+     global
         .magento
         .checkoutCartProduct
-        .add({ quoteId : req.session.cart.id , products : product}, function(err, isSuccess){
+        .add({
+            quoteId : req.session.cart.id ,
+            products : product
+        }, function(err, isSuccess){
             if (err) {
                 return res.send(500, {
                     message : err.message
                 });
-            }
-            if (isSuccess) {
-                /*
-                 * Retrieve the most updated cart
-                 * */
-//                    global
-//                        .magento
-//                        .checkoutCartProduct
-//                        .list(function(err, itemsInCart){
-//                            if (err) {
-//                                return res.send(500, {
-//                                    message : err.message
-//                                });
-//                            }
-//                            res.jsonp(itemsInCart);
-//                        });
-
-                return res.send(200, {
-                    message : "The product has been added to the cart"
-                });
-
             } else {
-                return res.send(400, {
-                    message : "The product was not added to the cart"
-                });
+                if (isSuccess) {
+                    /*
+                     * Retrieve the most updated cart
+                     * */
+                    global
+                        .magento
+                        .checkoutCart
+                        .info({
+                            quoteId : req.session.cart.id
+                        }, function(err, info){
+                            if (err) {
+                                return res.send(500, {
+                                    err : err
+                                });
+                            } else {
+                                res.format({
+                                    html : function(){
+                                        return res.redirect('/cart');
+                                    },
+                                    json : function(){
+                                        return res.send(200, {
+                                            message : "The product has been added to the cart",
+                                            cart : info
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                } else {
+                    return res.send(400, {
+                        message : "The product was not added to the cart"
+                    });
+                }
             }
         });
 };
 
 /**
- * retrieve a list of products in the shopping cart (quote) in the form of array.
- * @return JSON
+ * Retrieve cart detail
  * */
-exports.getAllCart = function(req, res){
+exports.getCart = function(req, res){
     if ( !req.session.cart ) {
         return res.send(400, {
             message : 'You cart is empty'
         });
+    } else {
+        global
+            .magento
+            .checkoutCart
+            .info({
+                quoteId : parseInt(req.session.cart.id)
+            }, function(err, cartInfo){
+                if (err) {
+                    return res.send(500, {
+                        message : err.message,
+                        err : err
+                    });
+                } else {
+                    console.log(cartInfo);
+                    return res.render('theme/checkout/cart', {
+                        cartInfo : cartInfo
+                    });
+                }
+            });
     }
-    global
-        .magento
-        .checkoutCartProduct
-        .list(function(err, itemsInCart){
-            if (err) {
-                return res.send(500, {
-                    message : err.message
-                });
-            }
-            res.jsonp(itemsInCart);
-        });
 };
 
 /**
@@ -555,14 +712,13 @@ exports.getPaymentMethods = function(req, res){
         });
     }
 
-    var obj = {
-        carId : req.session.cart.id
-    };
-
-    internal.getPaymentMethods(obj, function(err, paymentMethods){
+    internal.getPaymentMethods({
+        cartId : req.session.cart.id
+    }, function(err, paymentMethods){
         if (err) {
             return res.send(500, {
-                message : err.message
+                message : err.message,
+                error : err
             });
         } else {
             return res.send(200, {
@@ -603,11 +759,6 @@ exports.getShippingMethods = function(req, res){
 
 };
 
-exports.checkout = function(req, res){
-
-};
-
-
 
 /**
  * Cart Middleware
@@ -618,17 +769,84 @@ exports.checkout = function(req, res){
  * */
 exports.createCart = function(req, res, next){
 
+    var billingAddress = {
+        mode : 'billing',
+        firstname : 'john',
+        lastname : 'doe',
+        company : 'dummy',
+        street : '123 abc',
+        city : 'abc',
+        region : 'abcd',
+        postcode : '0123456',
+        country_id  : 'id',
+        telephone : '0123456789',
+        fax : '0123456789',
+        is_default_billing : 0,
+        is_default_shippping : 0
+    };
+
+    var shipppingAddress = {
+        mode : 'shipping',
+        firstname : 'john',
+        lastname : 'doe',
+        company : 'dummy',
+        street : '123 abc',
+        city : 'abc',
+        region : 'abcd',
+        postcode : '0123456',
+        country_id  : 'id',
+        telephone : '0123456789',
+        fax : '0123456789',
+        is_default_billing : 0,
+        is_default_shippping : 0
+    };
+
+
+
     if (_.isUndefined(req.session.cart)){
-        global.magento.checkoutCart.create(function(err,quoteId){
+        Store.findOne().exec(function(err, store){
             if (err) {
                 return res.send(500, {
                     message : err.message
                 });
+            } else {
+                var activeStore = _.find(store.store, function(store){
+                    return store.is_active === 1;
+                });
+                global
+                    .magento
+                    .checkoutCart
+                    .create({
+                        storeView  : activeStore.store_id
+                    },function(err,quoteId){
+                        if (err) {
+                            return res.send(500, {
+                                message : err.message
+                            });
+                        } else {
+                            global
+                                .magento
+                                .checkoutCartCustomer
+                                .addresses({
+                                    quoteId : quoteId,
+                                    customerAddressData : [billingAddress, shipppingAddress]
+                                }, function(err, isSet){
+                                    if (err) {
+                                        return res.send(500, {
+                                            message : err.message,
+                                            error : err
+                                        });
+                                    } else {
+                                        req.session.cart = {};
+                                        req.session.cart.id = quoteId;
+                                        next ();
+                                    }
+                                });
+                        }
+                    });
             }
-            req.session.cart = {};
-            req.session.cart.id = quoteId;
-            next ();
         });
+    } else {
+        next();
     }
-
 };

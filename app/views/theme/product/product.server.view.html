@@ -19,11 +19,11 @@
         <h2>{{ product.name }}</h2>
         <h3>Price : {{product.price}}</h3>
         {% if product.is_in_stock === '1' %}
-            <form class="form-horizontal" role="form">
+            <form class="form-horizontal" role="form" method="post" action="/cart/add">
                 <div class="form-group">
                     <label class="col-sm-2 control-label">Quantity</label>
                     <div class="col-sm-10">
-                        <select class="form-control">
+                        <select class="form-control" name="qty">
 
                             {% if product.qty > 10 %}
                                 {% set productCount = 10 %}

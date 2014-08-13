@@ -1,0 +1,34 @@
+{% extends '../layout2.server.view.html' %}
+
+{% block content %}
+
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <td>Product</td><td>Quantity</td><td>Price</td><td></td>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in cartInfo.items %}
+                <tr>
+                    <td>
+                        <a href="/magento/product/{{item.sku}}">{{item.name}} - {{item.sku}}</a>
+                    </td>
+                    <td>
+                        {{item.qty}}
+                    </td>
+                    <td>
+                        {{item.row_total}}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td></td>
+                    <td>Total</td>
+                </tr>
+            </tfoot>
+        </table>
+
+{% endblock %}
