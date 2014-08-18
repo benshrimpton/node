@@ -36,6 +36,11 @@ var magento = new Magento({
     path : '/api/xmlrpc',
     login : 'tebesfinwo',
     pass : '5U{us6fe=0F8f7}]fA_?n37Rb4FlVk'
+//    host : 'http://abs.bbdev.co/index.php',
+//    port : 80,
+//    path : '/api/xmlrpc',
+//    login : 'tebesfinwo-admin',
+//    pass : '5U{us6fe=0F8f7}]fA_?n37Rb4FlVk'
 });
 
 /**
@@ -44,6 +49,7 @@ var magento = new Magento({
  * Beware with this global properties, and it may pose as a security risk.
  * */
 magento.login(function(err, sessionId){
+    console.log(err);
     if (err) throw err;
     global.magento = magento;
 });

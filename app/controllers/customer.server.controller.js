@@ -294,7 +294,6 @@ exports.updateCustomerAddress = function(req, res){
                 var key = (isUpdated) ? 'successMsg' : 'failMsg';
                 var msg = (isUpdated) ? 'The address has been updated.' : 'The address fails to update';
                 req.flash( key, msg );
-                console.log(isUpdated);
                 return res.redirect('/customer/profile');
             }
         });
@@ -490,9 +489,8 @@ exports.signin = function(req, res){
  * Customer Profile Page
  * */
 exports.profile = function(req, res){
-    var customerId = (typeof req.session.customer.customer_id !== 'undefined' ) ? req.session.customer.customer_id : req.session.customer.id;
-    console.log(customerId);
 
+    var customerId = (typeof req.session.customer.customer_id !== 'undefined' ) ? req.session.customer.customer_id : req.session.customer.id;
     Async.parallel({
         customer : function(callback){
             global
@@ -535,6 +533,13 @@ exports.profile = function(req, res){
                 message : err.message
             });
         } else {
+
+            /**
+             * Put customer info and his addresses into session for fast retrieval.
+             * */
+            req.session.customer.info = results.customer;
+            req.session.customer.addresses = results.addresses;
+
             res.render('theme/customer/customerProfile', {
                 customer : results.customer,
                 addresses : results.addresses,
@@ -543,6 +548,7 @@ exports.profile = function(req, res){
             });
         }
     });
+
 };
 
 /**

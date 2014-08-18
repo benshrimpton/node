@@ -77,7 +77,7 @@
                     {% endif %}
                     <li>
                         <a href="/cart">
-                            <span class="glyphicon glyphicon-shopping-cart">0</span>
+                            <span class="glyphicon glyphicon-shopping-cart">{% if cart %}{{ parseInt(cart.items_qty) }}{% else %}{{ parseInt(cartInfo.items_qty) }}{% endif %}</span>
                         </a>
                     </li>
                 </ul>

@@ -1,0 +1,175 @@
+{% extends '../layout2.server.view.html' %}
+
+
+
+{% block content %}
+    <h1>Checkout</h1>
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <td>Product</td><td>Quantity</td><td>Price</td><td></td>
+                </tr>
+                </thead>
+                <tbody>
+                {% for item in cartInfo.items %}
+                <tr>
+                    <td>
+                        <a href="/magento/product/{{item.sku}}">{{item.name}} - {{item.sku}}</a>
+                    </td>
+                    <td>
+                        {{item.qty}}
+                    </td>
+                    <td>
+                        {{item.row_total}} {{ cartInfo.quote_currency_code }}
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+                <tfoot>
+                <tr>
+                    <td></td>
+                    <td>
+                        <b>Subtotal</b>
+                    </td>
+                    <td>
+                        <b>{{cartInfo.subtotal}} {{ cartInfo.quote_currency_code }}</b>
+                    </td>
+                </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div><!-- ./.row -->
+
+    <div class="row">
+
+        <form role="form">
+
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="checkoutGuestEmail">Email</label>
+                    <input type="email" class="form-control" id="checkoutGuestEmail" placeholder="Enter Email" >
+                </div>
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" > Check Out As Guest
+                    </label>
+                </div>
+                <div class="form-group">
+                    <a href="#">Create or use an account to checkout</a>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="addressCustomerFirstName" class="control-label">First Name</label>
+                    <input type="text" class="form-control" id="addressCustomerFirstName" name="firstname" placeholder="Your First Name" value="{% if address.firstname %}{{address.firstname}}{% else %}{{customer.firstname}}{% endif %}" >
+                </div>
+                <div class="form-group">
+                    <label for="addressCustomerLastName" class="control-label">Last Name</label>
+                    <input type="text" class="form-control" id="addressCustomerLastName" name="lastname" placeholder="Your Last Name" value=" {% if address.lastname %}{{address.lastname}}{% else %}{{customer.lastname}}{% endif %} " >
+                </div>
+                <div class="form-group">
+                    <label for="addressCustomerStreet1" class="control-label">Street 1</label>
+                    <input type="text" class="form-control" id="addressCustomerStreet1" name="street[]" placeholder="Your Street Address" value="{% if address.street[0] %}{{address.street[0]}}{% endif %}"  >
+                </div>
+                <div class="form-group">
+                    <label for="addressCustomerStreet2" class="control-label">Street 2</label>
+                    <input type="text" class="form-control" id="addressCustomerStreet2" name="street[]" placeholder="Your Apartment number, Studio number, etc"  value="{% if address.street[1] %}{{address.street[1]}}{% endif %}" >
+                </div>
+                <div class="form-group">
+                    <label for="addressCustomerZipcode" class="control-label">Zipcode</label>
+                    <input type="text" class="form-control" id="addressCustomerZipcode" name="postcode" placeholder="Your zipcode" value="{{address.postcode}}" >
+                </div>
+                <div class="form-group">
+                    <label for="addressCustomerCity" class="control-label">City</label>
+                    <input type="text" class="form-control" id="addressCustomerCity" name="city" placeholder="Your City" value="{{address.city}}" >
+                </div>
+                <div class="form-group">
+                    <label for="addressCustomerRegion" class="control-label">State/Region</label>
+                    <input type="text" class="form-control" id="addressCustomerRegion" name="region" placeholder="State" value="{{address.region}}" >
+                </div>
+                <div class="form-group">
+                    <label for="addressCustomerCountry" class="control-label">Country</label>
+                    <select class="form-control" id="addressCustomerCountry" name="country_id">
+                        {% for country in countries %}
+                        {% if country.country_id == address.country_id %}
+                        <option value="{{ country.country_id }}" selected >{{ country.name }}</option>
+                        {% else %}
+                        <option value="{{ country.country_id }}" >{{ country.name }}</option>
+                        {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" > Use a different shipping address
+                    </label>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="checkoutAdditionalInfo">Additional Info</label>
+                    <textarea class="form-control" rows="3" id="checkoutAdditionalInfo"></textarea>
+                </div>
+
+                <h3>Shipping Methods & Subtotal</h3>
+                <select class="form-control">
+                {% for shipping in shippings %}
+                    <option value="{{ shipping.code }}">{{ shipping.carrier_title }} {{ shipping.method_title }} {{ shipping.price }}</option>
+                {% endfor %}
+                </select>
+
+                <table class="table table-condensed">
+                    <tr>
+                        <td>Cart Subtotal</td>
+                        <td>{{cartInfo.subtotal}} {{ cartInfo.quote_currency_code }}</td>
+                    </tr>
+                    <tr>
+                        <td>Shipping & Handling</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>Tax</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>Order Total</td>
+                        <td>{{ cartInfo.grand_total }} {{ cartInfo.quote_currency_code }}</td>
+                    </tr>
+                </table>
+
+                <h3>Payment</h3>
+                <select class="form-control">
+                    {% for payment in payments %}
+                    <option value="{{payment.code}}" >{{payment.title}}</option>
+                    {% endfor %}
+                </select>
+
+                <div class="form-group">
+                    <label for="checkoutPaymentCCNumber" class="">Card Number</label>
+                    <input type="number" class="form-control" id="checkoutPaymentCCNumber" placeholder="Card Number" >
+                </div>
+                <div class="form-group">
+                    <label for="checkoutPaymentVerificationCode" class="">Verification Code</label>
+                    <input type="text" class="form-control" id="checkoutPaymentVerificationCode" placeholder="Code" >
+                </div>
+                <div class="form-group">
+                    <label class="">Expiration</label>
+                    <input type="text" maxlength="2" class="form-control" placeholder="MM" >
+                    <input type="text" maxlength="2"  class="form-control" placeholder="YY" >
+                </div>
+
+            </div>
+
+            <div class="form-group pull-right">
+                <input type="submit" class="btn btn-primary" value="Submit" >
+            </div>
+
+        </form>
+
+    </div>
+
+{% endblock %}

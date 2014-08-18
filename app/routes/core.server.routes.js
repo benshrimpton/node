@@ -3,7 +3,9 @@
 module.exports = function(app) {
 	// Root routing
 	var core = require('../../app/controllers/core');
-	app.route('/').get(core.index);
+    var cart = require('../../app/controllers/cart');
+
+	app.route('/').get(cart.cartToLocals ,core.index);
 
     app.route('/admin').get(core.admin);
 };

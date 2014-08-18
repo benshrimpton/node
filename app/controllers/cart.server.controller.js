@@ -380,9 +380,6 @@ internal.getProductInCart = function(cartId){
 exports.addToCart = function(req, res){
 
     var product = {};
-
-    console.log(req.body);
-
     product.sku = (req.body.sku) ? req.body.sku : null;
     product.qty = (req.body.qty || req.body.qty > 0) ? parseFloat(req.body.qty) : 1.00;
 
@@ -399,8 +396,6 @@ exports.addToCart = function(req, res){
     /*
      * Add item into cart
      * */
-
-    console.log(product);
      global
         .magento
         .checkoutCartProduct
@@ -421,13 +416,16 @@ exports.addToCart = function(req, res){
                         .magento
                         .checkoutCart
                         .info({
-                            quoteId : req.session.cart.id
+                            quoteId : parseInt(req.session.cart.id)
                         }, function(err, info){
                             if (err) {
                                 return res.send(500, {
                                     err : err
                                 });
                             } else {
+
+                                req.session.cart.details = info;
+
                                 res.format({
                                     html : function(){
                                         return res.redirect('/cart');
@@ -459,24 +457,29 @@ exports.getCart = function(req, res){
             message : 'You cart is empty'
         });
     } else {
-        global
-            .magento
-            .checkoutCart
-            .info({
-                quoteId : parseInt(req.session.cart.id)
-            }, function(err, cartInfo){
-                if (err) {
-                    return res.send(500, {
-                        message : err.message,
-                        err : err
-                    });
-                } else {
-                    console.log(cartInfo);
-                    return res.render('theme/checkout/cart', {
-                        cartInfo : cartInfo
-                    });
-                }
-            });
+//        global
+//            .magento
+//            .checkoutCart
+//            .info({
+//                quoteId : parseInt(req.session.cart.id)
+//            }, function(err, cartInfo){
+//                if (err) {
+//                    return res.send(500, {
+//                        message : err.message,
+//                        err : err
+//                    });
+//                } else {
+//                    console.log(cartInfo);
+//                    return res.render('theme/checkout/cart', {
+//                        cartInfo : cartInfo
+//                    });
+//                }
+//            });
+
+        return res.render('theme/checkout/cart', {
+            cartInfo : req.session.cart.details
+        });
+
     }
 };
 
@@ -769,7 +772,7 @@ exports.getShippingMethods = function(req, res){
  * */
 exports.createCart = function(req, res, next){
 
-    var billingAddress = {
+    var dummyBillingAddress = {
         mode : 'billing',
         firstname : 'john',
         lastname : 'doe',
@@ -785,7 +788,7 @@ exports.createCart = function(req, res, next){
         is_default_shippping : 0
     };
 
-    var shipppingAddress = {
+    var dummyShipppingAddress = {
         mode : 'shipping',
         firstname : 'john',
         lastname : 'doe',
@@ -824,12 +827,34 @@ exports.createCart = function(req, res, next){
                                 message : err.message
                             });
                         } else {
+
+                            var billingAddress = {};
+                            var shippingAddress = {};
+
+                            /**
+                             * In these addresses, there would be only one defaul_billing and one default_shipping
+                             * */
+
+                            console.log(req.session.customer);
+                            if (_.isUndefined(req.session.customer) === false){
+                                _.forEach(req.session.customer.addresses, function(address){
+                                    if (address.is_default_billing === true) {
+                                        billingAddress.mode = 'billing';
+                                        billingAddress.address_id = address.customer_address_id;
+                                    }
+                                    if (address.is_default_shipping === true) {
+                                        shippingAddress.mode = 'shipping';
+                                        shippingAddress.address_id = address.customer_address_id;
+                                    }
+                                });
+                            }
+
                             global
                                 .magento
                                 .checkoutCartCustomer
                                 .addresses({
                                     quoteId : quoteId,
-                                    customerAddressData : [billingAddress, shipppingAddress]
+                                    customerAddressData : [ (_.isEmpty(billingAddress)) ? dummyBillingAddress : billingAddress , (_.isEmpty(shippingAddress)) ? dummyShipppingAddress : shippingAddress ]
                                 }, function(err, isSet){
                                     if (err) {
                                         return res.send(500, {
@@ -846,6 +871,23 @@ exports.createCart = function(req, res, next){
                     });
             }
         });
+    } else {
+        next();
+    }
+};
+
+
+/**
+ * Middleware
+ * */
+
+/**
+ * Expose cart to locals
+ * */
+exports.cartToLocals = function(req, res, next){
+    if (req.session.cart){
+        res.locals.cart = req.session.cart.details;
+        next();
     } else {
         next();
     }
