@@ -242,27 +242,6 @@ internal.addItemToCart = function(args, callback){
  * */
 internal.getCartTotal = function(cartId){
 
-//    internal.getCurrentStoreId()
-//        .then(function(store){
-//            return new Promise(function(resolve, reject){
-//                global
-//                    .magento
-//                    .checkoutCart
-//                    .totals({
-//                        quoteId : cartId,
-//                        storeView : store.store_id
-//                    }, function(err, totals){
-//                        if (err) {
-//                            reject(err);
-//                        } else {
-//                            resolve(totals);
-//                        }
-//                    });
-//            });
-//        }).catch(function(err){
-//            reject(err);
-//        });
-
     return new Promise(function(resolve, reject){
         internal.getCurrentStoreId(function(err, activeStore){
             if (err) {
@@ -772,40 +751,6 @@ exports.getShippingMethods = function(req, res){
  * */
 exports.createCart = function(req, res, next){
 
-    var dummyBillingAddress = {
-        mode : 'billing',
-        firstname : 'john',
-        lastname : 'doe',
-        company : 'dummy',
-        street : '123 abc',
-        city : 'abc',
-        region : 'abcd',
-        postcode : '0123456',
-        country_id  : 'id',
-        telephone : '0123456789',
-        fax : '0123456789',
-        is_default_billing : 0,
-        is_default_shippping : 0
-    };
-
-    var dummyShipppingAddress = {
-        mode : 'shipping',
-        firstname : 'john',
-        lastname : 'doe',
-        company : 'dummy',
-        street : '123 abc',
-        city : 'abc',
-        region : 'abcd',
-        postcode : '0123456',
-        country_id  : 'id',
-        telephone : '0123456789',
-        fax : '0123456789',
-        is_default_billing : 0,
-        is_default_shippping : 0
-    };
-
-
-
     if (_.isUndefined(req.session.cart)){
         Store.findOne().exec(function(err, store){
             if (err) {
@@ -828,45 +773,113 @@ exports.createCart = function(req, res, next){
                             });
                         } else {
 
-                            var billingAddress = {};
-                            var shippingAddress = {};
+                            var billingAddress = {
+                                mode : 'billing',
+                                firstname : 'john',
+                                lastname : 'doe',
+                                company : 'dummy',
+                                street : '123 abc',
+                                city : 'abc',
+                                region : 'abcd',
+                                postcode : '0123456',
+                                country_id  : 'id',
+                                telephone : '0123456789',
+                                fax : '0123456789',
+                                is_default_billing : 0,
+                                is_default_shippping : 0
+                            };
 
-                            /**
-                             * In these addresses, there would be only one defaul_billing and one default_shipping
-                             * */
+                            var shippingAddress = {
+                                mode : 'shipping',
+                                firstname : 'john',
+                                lastname : 'doe',
+                                company : 'dummy',
+                                street : '123 abc',
+                                city : 'abc',
+                                region : 'abcd',
+                                postcode : '0123456',
+                                country_id  : 'id',
+                                telephone : '0123456789',
+                                fax : '0123456789',
+                                is_default_billing : 0,
+                                is_default_shippping : 0
+                            };
 
-                            console.log(req.session.customer);
                             if (_.isUndefined(req.session.customer) === false){
-                                _.forEach(req.session.customer.addresses, function(address){
-                                    if (address.is_default_billing === true) {
-                                        billingAddress.mode = 'billing';
-                                        billingAddress.address_id = address.customer_address_id;
-                                    }
-                                    if (address.is_default_shipping === true) {
-                                        shippingAddress.mode = 'shipping';
-                                        shippingAddress.address_id = address.customer_address_id;
-                                    }
-                                });
-                            }
 
-                            global
-                                .magento
-                                .checkoutCartCustomer
-                                .addresses({
-                                    quoteId : quoteId,
-                                    customerAddressData : [ (_.isEmpty(billingAddress)) ? dummyBillingAddress : billingAddress , (_.isEmpty(shippingAddress)) ? dummyShipppingAddress : shippingAddress ]
-                                }, function(err, isSet){
-                                    if (err) {
-                                        return res.send(500, {
-                                            message : err.message,
-                                            error : err
-                                        });
-                                    } else {
-                                        req.session.cart = {};
-                                        req.session.cart.id = quoteId;
-                                        next ();
-                                    }
-                                });
+                                var customer = {}
+                                customer.mode = 'customer';
+                                customer.customer_id = req.session.customer.info.customer_id;
+
+                                shippingAddress = {};
+                                billingAddress = {};
+
+                                if (_.isNull(req.session.customer.info.default_billing) === false ) {
+                                    billingAddress.mode = 'billing';
+                                    billingAddress.address_id = req.session.customer.info.default_billing;
+                                }
+
+                                if (_.isNull(req.session.customer.info.default_shipping) === false ){
+                                    shippingAddress.mode = 'shipping';
+                                    shippingAddress.address_id = req.session.customer.info.default_shipping;
+                                }
+
+
+                                global
+                                    .magento
+                                    .checkoutCartCustomer
+                                    .set({
+                                        quoteId : quoteId,
+                                        customerData :customer
+                                    }, function(err, isSet){
+                                        if (err) {
+                                            return res.status(500).send({
+                                                message : err.message,
+                                                error : err
+                                            });
+                                        } else {
+                                            global
+                                                .magento
+                                                .checkoutCartCustomer
+                                                .addresses({
+                                                    quoteId : quoteId,
+                                                    customerAddressData : [  billingAddress ,  shippingAddress ]
+                                                }, function(err, isSet){
+                                                    if (err) {
+                                                        return res.send(500, {
+                                                            message : err.message,
+                                                            error : err
+                                                        });
+                                                    } else {
+                                                        req.session.cart = {};
+                                                        req.session.cart.id = quoteId;
+                                                        next ();
+                                                    }
+                                                });
+                                        }
+                                    });
+
+                            } else {
+
+                                global
+                                    .magento
+                                    .checkoutCartCustomer
+                                    .addresses({
+                                        quoteId : quoteId,
+                                        customerAddressData : [  billingAddress ,  shippingAddress ]
+                                    }, function(err, isSet){
+                                        if (err) {
+                                            return res.send(500, {
+                                                message : err.message,
+                                                error : err
+                                            });
+                                        } else {
+                                            req.session.cart = {};
+                                            req.session.cart.id = quoteId;
+                                            next ();
+                                        }
+                                    });
+                            }
                         }
                     });
             }

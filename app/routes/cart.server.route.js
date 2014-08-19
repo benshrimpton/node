@@ -9,14 +9,15 @@
 
 module.exports = function(app){
 
-    var Cart = require('../../app/controllers/cart');
+    var Cart = require('../../app/controllers/cart'),
+        Customer = require('../../app/controllers/customer');
 
 
 
 
     app
         .route('/cart')
-        .get(Cart.getCart);
+        .get(Customer.hasAuthorization, Customer.customer ,Cart.cartToLocals, Cart.getCart);
 
 
     app

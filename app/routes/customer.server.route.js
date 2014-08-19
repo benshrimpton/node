@@ -5,7 +5,8 @@
 'use strict';
 
 module.exports = function(app){
-    var Customer = require('../../app/controllers/customer');
+    var Customer = require('../../app/controllers/customer'),
+        Cart = require('../../app/controllers/cart');
 
     /*
     *
@@ -50,22 +51,22 @@ module.exports = function(app){
     * **/
     app
         .route('/customer/profile')
-        .get(Customer.hasAuthorization, Customer.profile);
+        .get(Customer.hasAuthorization, Customer.customer, Cart.cartToLocals, Customer.profile);
 
     /*
     * Customer Address page.
     * **/
     app
         .route('/customer/address/new')
-        .get(Customer.hasAuthorization, Customer.customerAddressCreatePage)
-        .post(Customer.hasAuthorization, Customer.createCustomerAddress);
+        .get(Customer.hasAuthorization, Cart.cartToLocals, Customer.customerAddressCreatePage)
+        .post(Customer.hasAuthorization,  Customer.createCustomerAddress);
 
     /*
     * Retrieve the customer's addresses
     * **/
     app
         .route('/customer/address')
-        .get(Customer.hasAuthorization, Customer.customerAddressList);
+        .get(Customer.hasAuthorization, Cart.cartToLocals, Customer.customerAddressList);
 
 
     /*
@@ -74,7 +75,7 @@ module.exports = function(app){
     * **/
     app
         .route('/customer/address/:addressId')
-        .get(Customer.hasAuthorization, Customer.customerAddressDetail)
+        .get(Customer.hasAuthorization, Customer.customer, Cart.cartToLocals, Customer.customerAddressDetail)
         .post(Customer.hasAuthorization, Customer.updateCustomerAddress);
 
 

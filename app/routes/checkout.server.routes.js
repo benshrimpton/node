@@ -7,11 +7,13 @@
 
 module.exports = function(app){
 
-    var Checkout = require('../../app/controllers/checkout');
+    var Checkout = require('../../app/controllers/checkout'),
+        Cart = require('../../app/controllers/cart'),
+        Customer = require('../../app/controllers/customer');
 
     app
         .route('/checkout')
-        .get(Checkout.renderCheckout);
+        .get(Customer.hasAuthorization, Customer.customer , Cart.cartToLocals , Checkout.renderCheckout);
 
 
 };

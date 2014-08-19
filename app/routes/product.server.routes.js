@@ -29,7 +29,7 @@ module.exports = function(app){
     * retrieve all products
     * */
     app.route('/magento/product')
-        .get(customer.customer, cart.cartToLocals, product.getProducts);
+        .get( customer.customer , cart.cartToLocals , cart.cartToLocals, product.getProducts);
 
     /*
     * Retrieve all categories.
@@ -59,7 +59,7 @@ module.exports = function(app){
     * Retrieve the detail of the product using SKU
     * */
     app.route('/magento/product/:productSKU')
-        .get(customer.customer , cart.cartToLocals , product.getProductBySKU);
+        .get( customer.customer , cart.cartToLocals , product.getProductBySKU);
 
     //Binding the product with middleware
     app.param('productSKU', product.productBySKU);
