@@ -17,6 +17,7 @@ var Promise = require('bluebird'),
     CreditCard = require('credit-card');
 
 
+
 exports.renderCheckout = function(req, res){
     Async.parallel({
        shippings : function(cb){
@@ -40,38 +41,38 @@ exports.renderCheckout = function(req, res){
                });
        },
        countries : function(cb) {
-           Country.find({}).exec(function (err, countries) {
+           Country.find({}).sort('name').exec(function (err, countries) {
                cb(err, countries);
            });
        },
        billingAddress : function(cb){
-           if (req.session.customer.info.default_billing && req.session.customer.addresses.length > 0 ){
-               _.forEach(req.session.customer.addresses, function(address){
-                   if ( address.customer_address_id ===  req.session.customer.info.default_billing) {
-                       //console.log(address.street);
-                       //address.street = address.street.split('\n');
-                       if (_.isArray(address.street) === false ) {
-                           address.street = address.street.split('\n');
+           if (req.session.customer && req.session.customer.addresses.length > 0 ){
+
+               for(var i = 0; i < req.session.customer.addresses.length; i++){
+                   if ( req.session.customer.addresses[i].customer_address_id ===  req.session.customer.info.default_billing) {
+                       if (_.isArray(req.session.customer.addresses[i].street) === false ) {
+                           req.session.customer.addresses[i].street = req.session.customer.addresses[i].street.split('\n');
                        }
                        return cb(null, address);
                    }
-               });
+               }
+
            } else {
                return cb(null, null);
            }
        },
        shippingAddress : function(cb){
-           if (req.session.customer.info.default_shipping && req.session.customer.addresses.length > 0 ){
-               _.forEach(req.session.customer.addresses, function(address){
-                   if ( address.customer_address_id ===  req.session.customer.info.default_shipping) {
-                       //console.log(address.street);
-                       //address.street = address.street.split('\n');
-                       if (_.isArray(address.street) === false ) {
-                           address.street = address.street.split('\n');
+           if (req.session.customer && req.session.customer.addresses.length > 0 ){
+
+               for(var i = 0; i < req.session.customer.addresses.length; i++){
+                   if ( req.session.customer.addresses[i].customer_address_id ===  req.session.customer.info.default_shipping) {
+                       if (_.isArray(req.session.customer.addresses[i].street) === false ) {
+                           req.session.customer.addresses[i].street = req.session.customer.addresses[i].street.split('\n');
                        }
                        return cb(null, address);
                    }
-               });
+               }
+
            } else {
                return cb(null, null);
            }

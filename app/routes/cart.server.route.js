@@ -17,7 +17,7 @@ module.exports = function(app){
 
     app
         .route('/cart')
-        .get(Customer.hasAuthorization, Customer.customer ,Cart.cartToLocals, Cart.getCart);
+        .get(Customer.customer ,Cart.cartToLocals, Cart.getCart);
 
 
     app

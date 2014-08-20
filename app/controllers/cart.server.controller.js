@@ -432,29 +432,17 @@ exports.addToCart = function(req, res){
  * */
 exports.getCart = function(req, res){
     if ( !req.session.cart ) {
-        return res.send(400, {
-            message : 'You cart is empty'
+        res.format({
+            html : function(){
+                return res.render('theme/checkout/cart');
+            },
+            json : function(){
+                return res.send(400, {
+                    message : 'You cart is empty'
+                });
+            }
         });
     } else {
-//        global
-//            .magento
-//            .checkoutCart
-//            .info({
-//                quoteId : parseInt(req.session.cart.id)
-//            }, function(err, cartInfo){
-//                if (err) {
-//                    return res.send(500, {
-//                        message : err.message,
-//                        err : err
-//                    });
-//                } else {
-//                    console.log(cartInfo);
-//                    return res.render('theme/checkout/cart', {
-//                        cartInfo : cartInfo
-//                    });
-//                }
-//            });
-
         return res.render('theme/checkout/cart', {
             cartInfo : req.session.cart.details
         });
@@ -578,47 +566,67 @@ exports.removeItemFromCart = function(req, res){
 
 /**
  * Clear all of items in the cart
+ *
+ *
+ * Deleting cart in session is sufficient enough since Magento doesn't mention
+ * how to perform delete in Magento.
+ *
  * @return status
  * */
 exports.clearCart = function(req, res){
 
-    if (!req.session.cart){
-        return res.send(400, {
-            message  : 'You cart is empty'
-        });
-    }
+    delete req.session.cart;
 
-    global
-        .magento
-        .checkoutCartProduct
-        .list({ quoteId : req.session.cart.id }, function(err, products){
-            if (err) {
-                return res.send(500, {
-                    message : err.message
-                })
-            } else {
-                global
-                    .magento
-                    .checkoutCartProduct
-                    .remove({ quoteId : req.session.cart.id , productsData : products }, function(err, isRemoved){
-                        if (err) {
-                            return res.send(200, {
-                                message : err.message
-                            })
-                        } else {
-                            if (isRemoved) {
-                                return res.send(200, {
-                                    message : 'The cart has been cleared'
-                                })
-                            } else {
-                                return res.send(400, {
-                                    message : 'The cart was not cleared'
-                                });
-                            }
-                        }
-                    });
-            }
-        });
+    res.format({
+        html : function(){
+            return res.redirect('/cart');
+        },
+        json : function(){
+            return res.status(200).send({
+                message : 'The Cart has been cleared.'
+            });
+        }
+    });
+
+//    global
+//        .magento
+//        .checkoutCartProduct
+//        .list({ quoteId : req.session.cart.id }, function(err, products){
+//            if (err) {
+//                return res.send(500, {
+//                    message : err.message
+//                })
+//            } else {
+//                global
+//                    .magento
+//                    .checkoutCartProduct
+//                    .remove({ quoteId : req.session.cart.id , productsData : products }, function(err, isRemoved){
+//                        if (err) {
+//                            return res.send(200, {
+//                                message : err.message
+//                            })
+//                        } else {
+//                            if (isRemoved) {
+//
+//                                res.format({
+//                                    html : function(){
+//                                        return res.redirect('/cart');
+//                                    },
+//                                    json : function(){
+//                                        return res.send(200, {
+//                                            message : 'The cart has been cleared'
+//                                        })
+//                                    }
+//                                });
+//                            } else {
+//                                return res.send(400, {
+//                                    message : 'The cart was not cleared'
+//                                });
+//                            }
+//                        }
+//                    });
+//            }
+//        });
 
 };
 
@@ -644,9 +652,22 @@ exports.addCoupon = function(req, res){
                 message : err.message
             });
         } else {
-            return res.send(200, {
-                isAdded : isAdded
-            });
+            if (isAdded) {
+                /**
+                 * Store the coupon code in session.
+                 * */
+                req.session.cart.details.coupon_code = obj.couponCode;
+
+                return res.status(200).send({
+                    message : 'Coupon Monster likes your coupon',
+                    isAdded : isAdded
+                });
+            } else {
+                return res.status(400).send({
+                    message  : 'Sorry, Coupon Monster does not like your coupon.',
+                    isAdded : isAdded
+                });
+            }
         }
     });
 
@@ -673,9 +694,21 @@ exports.removeCoupon = function(req, res){
                 message : err.message
             });
         } else {
-            return res.send(200, {
-                isRemoved : isRemoved
-            });
+            if (isRemoved) {
+
+                req.session.cart.details.coupon_code = null;
+
+                return res.status(200).send({
+                    message :  'Coupon has been taken away from the Coupon Monster',
+                    isRemoved : isRemoved
+                });
+
+            } else {
+                return res.status(400).send({
+                    message : 'Coupon Monster is still having your coupon. Please try again later.',
+                    isRemoved : isRemoved
+                });
+            }
         }
     });
 
@@ -687,12 +720,6 @@ exports.removeCoupon = function(req, res){
  * Retrieve a list of available payment methods for a shopping cart
  * */
 exports.getPaymentMethods = function(req, res){
-
-    if (!req.session.cart){
-        return res.send(403, {
-            message  : 'You are forbidden '
-        });
-    }
 
     internal.getPaymentMethods({
         cartId : req.session.cart.id
@@ -891,16 +918,26 @@ exports.createCart = function(req, res, next){
 
 
 /**
- * Middleware
- * */
-
-/**
  * Expose cart to locals
  * */
 exports.cartToLocals = function(req, res, next){
     if (req.session.cart){
         res.locals.cart = req.session.cart.details;
         next();
+    } else {
+        next();
+    }
+};
+
+
+/**
+ * Double check that the cart does exist in the session.
+ * */
+exports.cartRequire = function(req, res, next){
+    if (!req.session.cart) {
+        return res.status(500).send({
+            message : 'There is something wrong with the cart. Please contact Admin'
+        });
     } else {
         next();
     }

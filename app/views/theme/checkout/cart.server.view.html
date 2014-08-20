@@ -2,45 +2,49 @@
 
 {% block content %}
 
-        <table class="table table-hover">
-            <thead>
-                <tr>
-                    <td>Product</td><td>Quantity</td><td>Price</td><td></td>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in cartInfo.items %}
-                <tr>
-                    <td>
-                        <a href="/magento/product/{{item.sku}}">{{item.name}} - {{item.sku}}</a>
-                    </td>
-                    <td>
-                        {{item.qty}}
-                    </td>
-                    <td>
-                        {{item.row_total}} {{ cartInfo.quote_currency_code }}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-            <tfoot>
-                <tr>
-                    <td></td>
-                    <td>
-                        <b>Subtotal</b>
-                    </td>
-                    <td>
-                        <b>{{cartInfo.subtotal}} {{ cartInfo.quote_currency_code }}</b>
-                    </td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td>
-                        <a href="/checkout" class="btn btn-primary">Proceed to checkout</a>
-                    </td>
-                </tr>
-            </tfoot>
-        </table>
+        {% if cart %}
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <td>Product</td><td>Quantity</td><td>Price</td><td></td>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in cartInfo.items %}
+                    <tr>
+                        <td>
+                            <a href="/magento/product/{{item.sku}}">{{item.name}} - {{item.sku}}</a>
+                        </td>
+                        <td>
+                            {{item.qty}}
+                        </td>
+                        <td>
+                            {{item.row_total}} {{ cartInfo.quote_currency_code }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td></td>
+                        <td>
+                            <b>Subtotal</b>
+                        </td>
+                        <td>
+                            <b>{{cartInfo.subtotal}} {{ cartInfo.quote_currency_code }}</b>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td>
+                            <a href="/checkout" class="btn btn-primary">Proceed to checkout</a>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        {% else %}
+            <div class="well well-lg">Your Cart is Empty.</div>
+        {% endif %}
 
 {% endblock %}

@@ -3,6 +3,7 @@
 
 
 {% block content %}
+
     <h1>Checkout</h1>
     <div class="row">
         <div class="col-md-12">
@@ -57,7 +58,9 @@
                     </label>
                 </div>
                 <div class="form-group">
-                    <a href="#">Create or use an account to checkout</a>
+                    <a href="/customer/signup">Create a new account to checkout</a>
+                    <br>
+                    <a href="/customer/signin">Sign in to checkout</a>
                 </div>
             </div>
 
@@ -65,37 +68,37 @@
                 <h2>Billing Address</h2>
                 <div class="form-group">
                     <label for="addressCustomerFirstName" class="control-label">First Name</label>
-                    <input type="text" class="form-control" id="addressCustomerFirstName" name="firstname" placeholder="Your First Name" value="{% if billingAddress.firstname %}{{billingAddress.firstname}}{% endif %}" >
+                    <input type="text" class="form-control" id="addressCustomerFirstName" name="firstname" placeholder="Your First Name" value="{% if billingAddress %}{{billingAddress.firstname}}{% endif %}" >
                 </div>
                 <div class="form-group">
                     <label for="addressCustomerLastName" class="control-label">Last Name</label>
-                    <input type="text" class="form-control" id="addressCustomerLastName" name="lastname" placeholder="Your Last Name" value=" {% if billingAddress.lastname %}{{billingAddress.lastname}}{% endif %} " >
+                    <input type="text" class="form-control" id="addressCustomerLastName" name="lastname" placeholder="Your Last Name" value=" {% if billingAddress %}{{billingAddress.lastname}}{% endif %} " >
                 </div>
                 <div class="form-group">
                     <label for="addressCustomerStreet1" class="control-label">Street 1</label>
-                    <input type="text" class="form-control" id="addressCustomerStreet1" name="street[]" placeholder="Your Street Address" value="{% if billingAddress.street[0] %}{{billingAddress.street[0]}}{% endif %}"  >
+                    <input type="text" class="form-control" id="addressCustomerStreet1" name="street[]" placeholder="Your Street Address" value="{% if billingAddress %}{{billingAddress.street[0]}}{% endif %}"  >
                 </div>
                 <div class="form-group">
                     <label for="addressCustomerStreet2" class="control-label">Street 2</label>
-                    <input type="text" class="form-control" id="addressCustomerStreet2" name="street[]" placeholder="Your Apartment number, Studio number, etc"  value="{% if billingAddress.street[1] %}{{billingAddress.street[1]}}{% endif %}" >
+                    <input type="text" class="form-control" id="addressCustomerStreet2" name="street[]" placeholder="Your Apartment number, Studio number, etc"  value="{% if billingAddress %}{{billingAddress.street[1]}}{% endif %}" >
                 </div>
                 <div class="form-group">
                     <label for="addressCustomerZipcode" class="control-label">Zipcode</label>
-                    <input type="text" class="form-control" id="addressCustomerZipcode" name="postcode" placeholder="Your zipcode" value="{{billingAddress.postcode}}" >
+                    <input type="text" class="form-control" id="addressCustomerZipcode" name="postcode" placeholder="Your zipcode" value="{% if billingAddress %}{{billingAddress.postcode}}{% endif %}" >
                 </div>
                 <div class="form-group">
                     <label for="addressCustomerCity" class="control-label">City</label>
-                    <input type="text" class="form-control" id="addressCustomerCity" name="city" placeholder="Your City" value="{{billingAddress.city}}" >
+                    <input type="text" class="form-control" id="addressCustomerCity" name="city" placeholder="Your City" value="{% if billingAddress %}{{billingAddress.city}}{% endif %}" >
                 </div>
                 <div class="form-group">
                     <label for="addressCustomerRegion" class="control-label">State/Region</label>
-                    <input type="text" class="form-control" id="addressCustomerRegion" name="region" placeholder="State" value="{{billingAddress.region}}" >
+                    <input type="text" class="form-control" id="addressCustomerRegion" name="region" placeholder="State" value="{% if billingAddress %}{{billingAddress.region}}{% endif %}" >
                 </div>
                 <div class="form-group">
                     <label for="addressCustomerCountry" class="control-label">Country</label>
                     <select class="form-control" id="addressCustomerCountry" name="country_id">
                         {% for country in countries %}
-                        {% if country.country_id == billingAddress.country_id %}
+                        {% if billingAddress && country.country_id == billingAddress.country_id %}
                         <option value="{{ country.country_id }}" selected >{{ country.name }}</option>
                         {% else %}
                         <option value="{{ country.country_id }}" >{{ country.name }}</option>
@@ -173,4 +176,4 @@
 
     </div>
 
-{% endblock %}
+{% endblock content %}

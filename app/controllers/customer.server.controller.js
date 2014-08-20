@@ -444,7 +444,7 @@ exports.customerSignin = function(req, res){
                             * visited.
                             * However, for now, it will be redirect to user profile page instead.
                             * **/
-                            res.redirect('/customer/profile');
+                            res.redirect('customer/profile');
                         } else {
 //                            return res.send(200, {
 //                                message : 'Login Failed'

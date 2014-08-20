@@ -13,7 +13,7 @@ module.exports = function(app){
 
     app
         .route('/checkout')
-        .get(Customer.hasAuthorization, Customer.customer , Cart.cartToLocals , Checkout.renderCheckout);
+        .get( Customer.customer , Cart.cartToLocals , Checkout.renderCheckout);
 
 
 };
