@@ -33,6 +33,10 @@ module.exports = function(app){
         .get(Cart.createCart, Cart.getPaymentMethods);
 
     app
+        .route('/cart/agreement')
+        .get();
+
+    app
         .route('/cart/clear')
         .get(Cart.clearCart);
 

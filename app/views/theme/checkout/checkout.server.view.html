@@ -3,7 +3,7 @@
 
 
 {% block content %}
-
+       {{failMsg}}
     <h1>Checkout</h1>
     <div class="row">
         <div class="col-md-12">
@@ -45,16 +45,16 @@
 
     <div class="row">
 
-        <form role="form">
+        <form role="form" method="post" action="/place/order" >
 
             <div class="col-md-4">
                 <div class="form-group">
                     <label for="checkoutGuestEmail">Email</label>
-                    <input type="email" class="form-control" id="checkoutGuestEmail" placeholder="Enter Email" >
+                    <input type="email" class="form-control" id="checkoutGuestEmail" name="guestEmail" placeholder="Enter Email" >
                 </div>
                 <div class="checkbox">
                     <label>
-                        <input type="checkbox" > Check Out As Guest
+                        <input type="checkbox" name="guestCheckOut" > Check Out As Guest
                     </label>
                 </div>
                 <div class="form-group">
@@ -67,36 +67,36 @@
             <div class="col-md-4">
                 <h2>Billing Address</h2>
                 <div class="form-group">
-                    <label for="addressCustomerFirstName" class="control-label">First Name</label>
-                    <input type="text" class="form-control" id="addressCustomerFirstName" name="firstname" placeholder="Your First Name" value="{% if billingAddress %}{{billingAddress.firstname}}{% endif %}" >
+                    <label for="billingFirstName" class="control-label">First Name</label>
+                    <input type="text" class="form-control" id="billingFirstName" name="billingFirstname" placeholder="Your First Name" value="{% if billingAddress %}{{billingAddress.firstname}}{% endif %}" >
                 </div>
                 <div class="form-group">
-                    <label for="addressCustomerLastName" class="control-label">Last Name</label>
-                    <input type="text" class="form-control" id="addressCustomerLastName" name="lastname" placeholder="Your Last Name" value=" {% if billingAddress %}{{billingAddress.lastname}}{% endif %} " >
+                    <label for="billingLastName" class="control-label">Last Name</label>
+                    <input type="text" class="form-control" id="billingLastName" name="billingLastname" placeholder="Your Last Name" value="{% if billingAddress %}{{billingAddress.lastname}}{% endif %}" >
                 </div>
                 <div class="form-group">
-                    <label for="addressCustomerStreet1" class="control-label">Street 1</label>
-                    <input type="text" class="form-control" id="addressCustomerStreet1" name="street[]" placeholder="Your Street Address" value="{% if billingAddress %}{{billingAddress.street[0]}}{% endif %}"  >
+                    <label for="billingStreet1" class="control-label">Street 1</label>
+                    <input type="text" class="form-control" id="billingStreet1" name="billingStreet[]" placeholder="Your Street Address" value="{% if billingAddress %}{{billingAddress.street[0]}}{% endif %}"  >
                 </div>
                 <div class="form-group">
-                    <label for="addressCustomerStreet2" class="control-label">Street 2</label>
-                    <input type="text" class="form-control" id="addressCustomerStreet2" name="street[]" placeholder="Your Apartment number, Studio number, etc"  value="{% if billingAddress %}{{billingAddress.street[1]}}{% endif %}" >
+                    <label for="billingStreet2" class="control-label">Street 2</label>
+                    <input type="text" class="form-control" id="billingStreet2" name="billingStreet[]" placeholder="Your Apartment number, Studio number, etc"  value="{% if billingAddress %}{{billingAddress.street[1]}}{% endif %}" >
                 </div>
                 <div class="form-group">
-                    <label for="addressCustomerZipcode" class="control-label">Zipcode</label>
-                    <input type="text" class="form-control" id="addressCustomerZipcode" name="postcode" placeholder="Your zipcode" value="{% if billingAddress %}{{billingAddress.postcode}}{% endif %}" >
+                    <label for="billingZipcode" class="control-label">Zipcode</label>
+                    <input type="text" class="form-control" id="billingZipcode" name="billingPostcode" placeholder="Your zipcode" value="{% if billingAddress %}{{billingAddress.postcode}}{% endif %}" >
                 </div>
                 <div class="form-group">
-                    <label for="addressCustomerCity" class="control-label">City</label>
-                    <input type="text" class="form-control" id="addressCustomerCity" name="city" placeholder="Your City" value="{% if billingAddress %}{{billingAddress.city}}{% endif %}" >
+                    <label for="billingCity" class="control-label">City</label>
+                    <input type="text" class="form-control" id="billingCity" name="billingCity" placeholder="Your City" value="{% if billingAddress %}{{billingAddress.city}}{% endif %}" >
                 </div>
                 <div class="form-group">
-                    <label for="addressCustomerRegion" class="control-label">State/Region</label>
-                    <input type="text" class="form-control" id="addressCustomerRegion" name="region" placeholder="State" value="{% if billingAddress %}{{billingAddress.region}}{% endif %}" >
+                    <label for="billingRegion" class="control-label">State/Region</label>
+                    <input type="text" class="form-control" id="billingRegion" name="billingRegion" placeholder="State" value="{% if billingAddress %}{{billingAddress.region}}{% endif %}" >
                 </div>
                 <div class="form-group">
-                    <label for="addressCustomerCountry" class="control-label">Country</label>
-                    <select class="form-control" id="addressCustomerCountry" name="country_id">
+                    <label for="billingCountry" class="control-label">Country</label>
+                    <select class="form-control" id="billingCountry" name="billingCountry_id">
                         {% for country in countries %}
                         {% if billingAddress && country.country_id == billingAddress.country_id %}
                         <option value="{{ country.country_id }}" selected >{{ country.name }}</option>
@@ -106,25 +106,93 @@
                         {% endfor %}
                     </select>
                 </div>
+                <div class="form-group">
+                    <label for="billingTelephone" class="control-label">Telephone</label>
+                    <input type="text" class="form-control" id="billingTelephone" name="billingTelephone" placeholder="Your telephone number" >
+                </div>
+                <div class="form-group">
+                    <label for="billingFax" class="control-label">Fax</label>
+                    <input type="text" class="form-control" id="billingFax" name="billingFax" placeholder="Your Fax" >
+                </div>
                 <div class="checkbox">
                     <label>
-                        <input type="checkbox" > Use a different shipping address
+                        <input id="different-shipping-address" type="checkbox" name="differentAddress" > Use a different shipping address
                     </label>
                 </div>
+
+                <div class="shipping-form">
+                    <h2>Shipping Address</h2>
+                    <div class="form-group">
+                        <label for="shippingFirstName" class="control-label">First Name</label>
+                        <input type="text" class="form-control" id="shippingFirstName" name="shippingFirstname" placeholder="Your First Name" value="{% if shippingAddress %}{{shippingAddress.firstname}}{% endif %}" >
+                    </div>
+                    <div class="form-group">
+                        <label for="shippingLastName" class="control-label">Last Name</label>
+                        <input type="text" class="form-control" id="shippingLastName" name="shippingLastname" placeholder="Your Last Name" value=" {% if shippingAddress %}{{shippingAddress.lastname}}{% endif %} " >
+                    </div>
+                    <div class="form-group">
+                        <label for="shippingStreet1" class="control-label">Street 1</label>
+                        <input type="text" class="form-control" id="shippingStreet1" name="shippingStreet[]" placeholder="Your Street Address" value="{% if shippingAddress %}{{shippingAddress.street[0]}}{% endif %}"  >
+                    </div>
+                    <div class="form-group">
+                        <label for="shippingStreet2" class="control-label">Street 2</label>
+                        <input type="text" class="form-control" id="shippingStreet2" name="shippingStreet[]" placeholder="Your Apartment number, Studio number, etc"  value="{% if shippingAddress %}{{shippingAddress.street[1]}}{% endif %}" >
+                    </div>
+                    <div class="form-group">
+                        <label for="shippingZipcode" class="control-label">Zipcode</label>
+                        <input type="text" class="form-control" id="shippingZipcode" name="shippingPostcode" placeholder="Your zipcode" value="{% if shippingAddress %}{{shippingAddress.postcode}}{% endif %}" >
+                    </div>
+                    <div class="form-group">
+                        <label for="shippingCity" class="control-label">City</label>
+                        <input type="text" class="form-control" id="shippingCity" name="shippingCity" placeholder="Your City" value="{% if shippingAddress %}{{shippingAddress.city}}{% endif %}" >
+                    </div>
+                    <div class="form-group">
+                        <label for="shippingRegion" class="control-label">State/Region</label>
+                        <input type="text" class="form-control" id="shippingRegion" name="shippingRegion" placeholder="State" value="{% if shippingAddress %}{{shippingAddress.region}}{% endif %}" >
+                    </div>
+                    <div class="form-group">
+                        <label for="shippingCountry" class="control-label">Country</label>
+                        <select class="form-control" id="shippingCountry" name="shippingCountry_id">
+                            {% for country in countries %}
+                            {% if shippingAddress && country.country_id == shippingAddress.country_id %}
+                            <option value="{{ country.country_id }}" selected >{{ country.name }}</option>
+                            {% else %}
+                            <option value="{{ country.country_id }}" >{{ country.name }}</option>
+                            {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="shippingTelephone" class="control-label">Telephone</label>
+                        <input type="text" class="form-control" id="shippingTelephone" name="shippingTelephone" placeholder="Your telephone number" >
+                    </div>
+                    <div class="form-group">
+                        <label for="shippingFax" class="control-label">Fax</label>
+                        <input type="text" class="form-control" id="shippingFax" name="shippingFax" placeholder="Your Fax" >
+                    </div>
+                </div><!-- ./.shipping-form -->
+
             </div>
 
             <div class="col-md-4">
                 <div class="form-group">
                     <label for="checkoutAdditionalInfo">Additional Info</label>
-                    <textarea class="form-control" rows="3" id="checkoutAdditionalInfo"></textarea>
+                    <textarea class="form-control" name="additionalRow" rows="3" id="checkoutAdditionalInfo"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="checkoutCoupon" class="control-label">Coupon</label>
+                    <input type="text" id="checkoutCoupon" class="form-control" name="coupon">
                 </div>
 
                 <h3>Shipping Methods & Subtotal</h3>
-                <select class="form-control">
-                {% for shipping in shippings %}
-                    <option value="{{ shipping.code }}">{{ shipping.carrier_title }} {{ shipping.method_title }} {{ shipping.price }}</option>
-                {% endfor %}
-                </select>
+                <div class="form-group">
+                    <select class="form-control" name="shippingMethod">
+                    {% for shipping in shippings %}
+                        <option value="{{ shipping.code }}">{{ shipping.carrier_title }} {{ shipping.method_title }} {{ shipping.price }}</option>
+                    {% endfor %}
+                    </select>
+                </div>
 
                 <table class="table table-condensed">
                     <tr>
@@ -146,30 +214,32 @@
                 </table>
 
                 <h3>Payment</h3>
-                <select class="form-control">
-                    {% for payment in payments %}
-                    <option value="{{payment.code}}" >{{payment.title}}</option>
-                    {% endfor %}
-                </select>
+                <div class="form-group">
+                    <select class="form-control" name="paymentMethod">
+                        {% for payment in payments %}
+                        <option value="{{payment.code}}" >{{payment.title}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
 
                 <div class="form-group">
                     <label for="checkoutPaymentCCNumber" class="">Card Number</label>
-                    <input type="number" class="form-control" id="checkoutPaymentCCNumber" placeholder="Card Number" >
+                    <input type="number" class="form-control" name="cc_number" id="checkoutPaymentCCNumber" placeholder="Card Number" >
                 </div>
                 <div class="form-group">
                     <label for="checkoutPaymentVerificationCode" class="">Verification Code</label>
-                    <input type="text" class="form-control" id="checkoutPaymentVerificationCode" placeholder="Code" >
+                    <input type="text" class="form-control" name="cc_cid" id="checkoutPaymentVerificationCode" placeholder="Code" >
                 </div>
                 <div class="form-group">
                     <label class="">Expiration</label>
-                    <input type="text" maxlength="2" class="form-control" placeholder="MM" >
-                    <input type="text" maxlength="2"  class="form-control" placeholder="YY" >
+                    <input type="text" name="cc_exp_month" maxlength="2" class="form-control" placeholder="MM" >
+                    <input type="text" name="cc_exp_year" maxlength="2"  class="form-control" placeholder="YY" >
                 </div>
 
             </div>
 
             <div class="form-group pull-right">
-                <input type="submit" class="btn btn-primary" value="Submit" >
+                <input type="submit"  class="btn btn-primary" value="Place Order" >
             </div>
 
         </form>

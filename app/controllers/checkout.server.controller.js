@@ -76,6 +76,17 @@ exports.renderCheckout = function(req, res){
            } else {
                return cb(null, null);
            }
+       },
+       license : function(cb) {
+           global
+               .magento
+               .checkoutCart
+               .license({
+                   quoteId : req.session.cart.id,
+                   storeView : req.session.cart.details.store_id
+               }, function(err, license){
+                   cb(err, license);
+               });
        }
     }, function(err, results){
         if (err) {
@@ -87,7 +98,9 @@ exports.renderCheckout = function(req, res){
                 countries : results.countries,
                 cartInfo : req.session.cart.details,
                 billingAddress : results.billingAddress,
-                shippingAddress : results.shippingAddress
+                shippingAddress : results.shippingAddress,
+                license : results.license,
+                failMsg : JSON.stringify(req.flash('failMsg'))
             });
         }
     });

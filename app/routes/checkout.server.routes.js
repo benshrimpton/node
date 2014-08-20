@@ -16,4 +16,9 @@ module.exports = function(app){
         .get( Customer.customer , Cart.cartToLocals , Checkout.renderCheckout);
 
 
+    app
+        .route('/place/order')
+        .post(Cart.placeOrder);
+
+
 };

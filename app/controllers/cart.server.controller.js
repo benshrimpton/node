@@ -24,6 +24,13 @@ var Promise = require('bluebird'),
 
 var internal = {};
 
+/**
+ * Validate the email.
+ * */
+internal.validateEmail = function(email){
+    var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(email);
+}
 
 /**
  * Retrieve active store object
@@ -54,23 +61,16 @@ internal.getCurrentStoreId = function(cb){
  * }
  *
  * */
-internal.addCouponToCart = function(args, callback){
-
-    if (typeof couponCode === 'function' ) {
-        throw new Error('Wrong type couponCode');
-    } else if ( ! couponCode ) {
-        throw new Error('Coupon Code cannot be empty');
-    }
-
+internal.addCouponToCart = function(cartId, couponCode, callback){
 
     global
         .magento
         .checkoutCartCoupon
         .add({
-            quoteId : args.cartId,
-            couponCode : args.couponCode
+            quoteId : cartId,
+            couponCode : couponCode
         }, function(err, isAdded){
-            callback(err, isAdded);
+            return callback(err, isAdded);
         });
 
 };
@@ -118,7 +118,7 @@ internal.getPaymentMethods = function(cartId, callback){
  * Set a payment method for a shopping cart
  *
  * args = {
- *  cartId : Shopping Cart Id
+ *  quoteId : Shopping Cart Id
  *  po_number : Purchase Order number,
  *  method : payment method,
  *  cc_cid : credit card CID,
@@ -132,45 +132,12 @@ internal.getPaymentMethods = function(cartId, callback){
  * */
 internal.setupPayment = function(args, callback){
 
-    if (_.isNull(args) || _.isUndefined(args) || _.isFunction(callback) === false ){
-        throw new Error('Wrong argument type');
-    }
-
-    var card = {
-        cardType :args.cc_type.toUpperCase(),
-        number : args.cc_number,
-        expiryMonth : args.cc_exp_month,
-        expiryYear : args.cc_exp_year
-    };
-
-    var validation = CreditCard.validate(card);
-
-    if( validation.validCardNumber === false ) {
-        return callback(new Error('Your credit card number is not valid'));
-    } else if ( validation.validExpiryMonth === false ) {
-        return callback(new Error('Your expiry month is incorrect'));
-    } else if ( validation.validExpiryYear === false ) {
-        return callback(new Error('Your expiry year is incorrect'));
-    } else if (validation.validCvv === false) {
-        return callback(new Error('Your CVV is incorrect'));
-    } else if ( validation.isExpired ){
-        return callback(new Error('Your card has expired'));
-    }
-
-    var paymentData = _.clone(args);
-    delete magentoCC.cartId;
-
     global
         .magento
         .checkoutCartPayment
-        .method({
-            quoteId : args.cartId,
-            paymentData : paymentData
-        }, function(err, isSucess){
+        .method( args , function(err, isSucess){
             callback(err, isSucess);
         });
-
-
 
 };
 
@@ -205,23 +172,16 @@ internal.getShippingMethods = function(args, callback){
  * Set a shipping method for a shopping cart
  *
  * args = {
- *  cartId : Your shopping cart id,
- *  shippingMethod : Your shipping method code
+ *  quoteId : Your shopping cart id,
+ *  customerData : The customer data
  * }
  * */
 internal.setShippingMethodToCart = function(args, callback){
 
-    if (_.isNull(args) || _.isUndefined(args) || _.isFunction(callback) === false ){
-        throw new Error('Wrong argument type');
-    }
-
     global
         .magento
         .checkoutCartShipping
-        .method({
-            quoteId : args.cartId,
-            shippingMethod : args.shippingMethod
-        }, function(err, isSet){
+        .method(args, function(err, isSet){
             return callback(err, isSet);
         });
 
@@ -231,6 +191,65 @@ internal.setShippingMethodToCart = function(args, callback){
  *
  * */
 internal.addItemToCart = function(args, callback){
+
+};
+
+
+/**
+ *
+ * Validate
+ *
+ * */
+internal.validateCheckout = function(checkout, quoteId, cb){
+
+    //Guest checkout
+    if ( checkout.guestCheckOut ){
+
+        for(var key in checkout){
+            if (checkout.hasOwnProperty(key)){
+                console.log(key + " ->  " + checkout[key]);
+            }
+        }
+
+        if ( checkout.guestCheckOut ) {
+            if ( internal.validateEmail(checkout.guestEmail ) === false) {
+                return cb(new Error('Please enter a valid email address'));
+            }
+        }
+
+    }
+
+    if ( ! checkout.billingFirstname || ( !checkout.shippingFirstName && checkout.differentAddress ) ) {
+        return cb(new Error('Please enter a valid first name.'));
+    }
+
+    if ( ! checkout.billingLastname || ( ! checkout.shippingLastName && checkout.differentAddress ) ){
+        return cb(new Error('Please enter a valid last name'));
+    }
+
+    if ( ! checkout.billingStreet || ( ! checkout.shippingStreet && checkout.differentAddress ) ) {
+        return cb(new Error('Please enter a valid street address'));
+    }
+
+    if ( ! checkout.billingPostcode || ( ! checkout.shippingPostcode && checkout.differentAddress ) ) {
+        return cb(new Error('Please enter a valid postcode'))
+    }
+
+    if ( ! checkout.billingCity || ( ! checkout.shippingCity && checkout.differentAddress ) ) {
+        return cb(new Error('Please enter a valid city'));
+    }
+
+    if (  ! checkout.billingRegion || ( ! checkout.shippingCity && checkout.differentAddress ) ) {
+        return cb(new Error('Please enter a valid region'));
+    }
+
+    if ( ! checkout.billingCountry_id || ( ! checkout.billingCountry_id && checkout.differentAddress ) ) {
+        return cb(new Error('Please select a country'));
+    }
+
+
+    return cb(null);
+
 
 };
 
@@ -273,24 +292,17 @@ internal.getCartTotal = function(cartId){
  *
  * @return []
  * */
-internal.getTotalInfo = function(cartId){
-    return new Promise(function(resolve, reject){
-        console.log(cartId + ' %%^%&%^&^%&^%^767%^&%^&%^&');
-        global
-            .magento
-            .checkoutCart
-            .info({
-                quoteId : cartId
-            }, function(err, cartInfo){
-                if (err) {
-                    console.log(err);
-                    reject(err);
-                } else {
-                    console.log(cartInfo);
-                    resolve(cartInfo);
-                }
-            });
-    });
+internal.getTotalInfo = function(cartId, cb){
+
+    global
+        .magento
+        .checkoutCart
+        .info({
+            quoteId : cartId
+        }, function(err, cartInfo){
+            cb(err, cartInfo);
+        });
+
 };
 
 /**
@@ -443,8 +455,15 @@ exports.getCart = function(req, res){
             }
         });
     } else {
-        return res.render('theme/checkout/cart', {
-            cartInfo : req.session.cart.details
+
+        //retrieve the latest cart
+        internal.getTotalInfo(req.session.cart.id, function(err, info){
+            //update the cart in the session to the latest
+            req.session.cart.details = info;
+
+            return res.render('theme/checkout/cart', {
+                cartInfo : info
+            });
         });
 
     }
@@ -588,46 +607,6 @@ exports.clearCart = function(req, res){
         }
     });
 
-//    global
-//        .magento
-//        .checkoutCartProduct
-//        .list({ quoteId : req.session.cart.id }, function(err, products){
-//            if (err) {
-//                return res.send(500, {
-//                    message : err.message
-//                })
-//            } else {
-//                global
-//                    .magento
-//                    .checkoutCartProduct
-//                    .remove({ quoteId : req.session.cart.id , productsData : products }, function(err, isRemoved){
-//                        if (err) {
-//                            return res.send(200, {
-//                                message : err.message
-//                            })
-//                        } else {
-//                            if (isRemoved) {
-//
-//                                res.format({
-//                                    html : function(){
-//                                        return res.redirect('/cart');
-//                                    },
-//                                    json : function(){
-//                                        return res.send(200, {
-//                                            message : 'The cart has been cleared'
-//                                        })
-//                                    }
-//                                });
-//                            } else {
-//                                return res.send(400, {
-//                                    message : 'The cart was not cleared'
-//                                });
-//                            }
-//                        }
-//                    });
-//            }
-//        });
-
 };
 
 /**
@@ -641,12 +620,12 @@ exports.addCoupon = function(req, res){
         });
     }
 
-    var obj =  {
-        cartId : req.session.cart.id,
-        couponCode : req.body.couponCode
-    };
+//    var obj =  {
+//        cartId : req.session.cart.id,
+//        couponCode : req.body.couponCode
+//    };
 
-    internal.addCouponToCart(obj, function(err, isAdded){
+    internal.addCouponToCart(req.session.cart.id, req.body.couponCode, function(err, isAdded){
         if (err) {
             return res.send(500, {
                 message : err.message
@@ -765,6 +744,211 @@ exports.getShippingMethods = function(req, res){
             });
         }
     });
+
+};
+
+
+/**
+ * Place the cart in order
+ *
+ *
+ guestEmail ->  12@12.com
+ guestCheckOut ->  on
+ firstname ->  Jun,
+ lastname ->  Ooi,
+ street ->  2149 62nd st,2f
+ postcode ->  11204,
+ city ->  Brooklyn,
+ region ->  NY,
+ country_id ->  US,AF
+ differentAddress ->  on
+ additionalRow ->  1312312211232131231231231
+ coupon ->  741852963
+ shippingMethod ->  flatrate_flatrate
+ paymentMethod ->  ccsave
+ cc_number ->  741852963
+ cc_cid ->  78945
+ cc_exp_month ->  85
+ cc_exp_year ->  74
+ *
+ * */
+exports.placeOrder = function(req, res){
+
+    internal.validateCheckout(req.body, req.session.cart.id, function(err){
+        if (err) {
+            res.format({
+                html  : function(){
+                    req.flash('failMsg', err.message);
+                    return res.redirect('/checkout');
+                },
+                json : function(){
+                    return res.status(400).send(err.message);
+                }
+            });
+        } else {
+
+            Async.series({
+                addCoupon : function(cb){
+
+//                    internal.addCouponToCart( req.session.cart.id, req.body.coupon,
+//                    function(err, result){
+//                        cb(err, result);
+//                    });
+
+                    //disabled temporarily
+                    cb(null);
+
+                },
+                addShipping : function(cb){
+
+                    internal.setShippingMethodToCart({
+                        quoteId : req.session.cart.id,
+                        shippingMethod : req.body.shippingMethod
+                    }, function(err, result){
+                        cb(err, result);
+                    });
+                },
+                addCustomerInfo : function(cb){
+
+                    global
+                        .magento
+                        .checkoutCartCustomer
+                        .set({
+                            quoteId : req.session.cart.id,
+                            customerData : {
+                                mode : 'guest',
+                                email : req.body.guestEmail,
+                                firstname : req.body.billingFirstname,
+                                lastname : req.body.billingLastname
+                            }
+                        }, function(err, result){
+                            cb(err, result);
+                        });
+
+                },
+                addBillingAddress : function(cb){
+
+                    global
+                        .magento
+                        .checkoutCartCustomer
+                        .addresses({
+                        quoteId : req.session.cart.id,
+                        customerAddressData : {
+                            mode : 'billing',
+                            firstname : req.body.billingFirstname,
+                            lastname : req.body.billingLastname,
+                            street : req.body.billingStreet.join(' '),
+                            city : req.body.billingCity,
+                            region : req.body.billingRegion,
+                            postcode : req.body.billingPostcode,
+                            country_id : req.body.billingCountry_id,
+                            telephone : req.body.billingTelephone,
+                            fax : req.body.billingFax
+                        }
+                    }, function(err, result){
+                        cb(err, result);
+                    });
+                },
+                addShippingAddress : function(cb){
+
+                    global
+                        .magento
+                        .checkoutCartCustomer
+                        .addresses({
+                        quoteId : req.session.cart.id,
+                        customerAddressData : {
+                            mode : 'shipping',
+                            firstname : (req.body.differentAddress) ? req.body.shippingFirstname : req.body.billingFirstname,
+                            lastname : (req.body.differentAddress) ? req.body.shippingLastname : req.body.billingLastname,
+                            street : (req.body.differentAddress) ? req.body.shippingStreet.join(' ') : req.body.billingStreet.join(' '),
+                            city : (req.body.differentAddress) ? req.body.shippingCity : req.body.billingCity,
+                            region : (req.body.differentAddress) ? req.body.shippingRegion : req.body.billingRegion,
+                            postcode : (req.body.differentAddress) ? req.body.shippingPostcode : req.body.billingPostcode,
+                            country_id : (req.body.differentAddress) ? req.body.shippingCountry_id :  req.body.billingCountry_id,
+                            telephone : (req.body.differentAddress) ? req.body.shippingTelephone : req.body.billingTelephone,
+                            fax : (req.body.differentAddress) ? req.body.shippingFax :req.body.billingFax
+                        }
+                    }, function(err, result){
+                        cb(err, result);
+                    });
+                },
+                addShippingMethod : function(cb){
+                    global
+                        .magento
+                        .checkoutCartShipping
+                        .method({
+                            quoteId : req.session.cart.id,
+                            shippingMethod : req.body.shippingMethod
+                        }, function(err, result){
+                            cb(err, result);
+                        });
+                },
+                addPayment : function(cb){
+
+                    internal.setupPayment({
+                        quoteId : req.session.cart.id,
+                        paymentData : {
+                            po_number : null,
+                            method : req.body.paymentMethod,
+                            cc_cid : req.body.cc_cid,
+                            cc_type : null, //credit card type. Do we need to pass in our own detect credit card type ?
+                            cc_exp_month : req.body.cc_exp_month,
+                            cc_exp_year : req.body.cc_exp_year,
+                            cc_number : req.body.cc_number,
+                            cc_owner : req.body.billingFirstname + ' ' + req.body.billingLastname
+                        }
+                    }, function(err, result){
+                        cb(err, result);
+                    });
+                }
+            }, function(err, results){
+                if (err) {
+                    res.format({
+                        html : function(){
+                            req.flash('failMsg', err);
+                            return res.redirect('/checkout');
+                        },
+                        json : function(){
+                            return res.status(400).send(err);
+                        }
+                    });
+
+                } else {
+                    global
+                        .magento
+                        .checkoutCart
+                        .order({
+                            quoteId : req.session.cart.id
+                        }, function(err, result){
+                            if (err) {
+                                res.format({
+                                    html : function(){
+                                        req.flash('failMsg', err);
+                                        return res.redirect('/checkout');
+                                    },
+                                    json : function(){
+                                        return res.status(400).send(err);
+                                    }
+                                });
+                            } else {
+                                res.format({
+                                    html : function(){
+                                        return res.render('theme/checkout/success', {
+                                            result : result
+                                        });
+                                    },
+                                    json : function(){
+                                        return res.status(200).send(result);
+                                    }
+                                });
+                            }
+                        });
+                }
+            });
+
+        }
+    });
+
 
 };
 
